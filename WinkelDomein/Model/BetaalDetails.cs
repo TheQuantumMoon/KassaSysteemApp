@@ -1,4 +1,4 @@
-namespace WinkelDomein;
+namespace WinkelDomein.Model;
 
 public class BetaalDetails
 {

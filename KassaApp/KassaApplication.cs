@@ -1,16 +1,19 @@
-using WinkelDomein;
-using BetaalSysteemMock;
 using static System.Console;
+using WinkelDomein.Model;
 
 namespace KassaApp;
 
-public class Program
+public class KassaApplication
 {
-    public static void Main(string[] args)
-    {
-        IBetaalTerminal snelleTerminal = new MockBetaalTerminal(50, 200);
-        //var kassa = new Kassa(..., terminal, ...);
+    private readonly Kassa _kassa;
 
+    public KassaApplication(Kassa kassa) {
+        _kassa = kassa;
+        StartApplication();
+    }
+
+    public void StartApplication()
+    {
         DisplayTicket();
         ReadKey();
     }
@@ -20,14 +23,14 @@ public class Program
         string ticketCode = DateTime.Now.ToString("yyyy.MM.dd.HH.mm.ss.fff");
         string date = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
 
-        WriteThickLine(ticketWidth);
+        PrintThickLine(ticketWidth);
         PrintTicketHeader(ticketWidth);
-        WriteThickLine(ticketWidth);
+        PrintThickLine(ticketWidth);
         WriteLineLeftPadding($"Ticket: {ticketCode}", paddingLeft);
         WriteLineLeftPadding($"Datum: {date}", paddingLeft);
-        WriteThinLine(ticketWidth);
+        PrintThinLine(ticketWidth);
         WriteLineLeftPadding("(leeg)", paddingLeft);
-        WriteThickLine(ticketWidth);
+        PrintThickLine(ticketWidth);
         WriteLine();
         PrintUserInstructions();
     }
@@ -40,11 +43,11 @@ public class Program
         int calculatedPadding = text.Length + padding;
         WriteLine(text.PadLeft(calculatedPadding));
     }
-    public static void WriteThinLine(int length) {
+    public static void PrintThinLine(int length) {
         string thinLine = new('-', length);
         WriteLine(thinLine);
     }
-    public static void WriteThickLine(int length) {
+    public static void PrintThickLine(int length) {
         string thickLine = new('=', length);
         WriteLine(thickLine);
     }

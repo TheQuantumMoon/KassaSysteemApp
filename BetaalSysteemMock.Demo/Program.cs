@@ -1,5 +1,6 @@
-using WinkelDomein;
 using BetaalSysteemMock;
+using WinkelDomein.Interface;
+using WinkelDomein.Model;
 
 // ════════════════════════════════════════════════════════════════════
 //  Demo: Hoe de MockBetaalTerminal te gebruiken

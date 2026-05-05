@@ -1,5 +1,5 @@
-
-using WinkelDomein;
+using WinkelDomein.Interface;
+using WinkelDomein.Model;
 
 namespace BetaalSysteemMock;
 

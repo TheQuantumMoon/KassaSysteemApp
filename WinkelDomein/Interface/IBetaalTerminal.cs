@@ -1,4 +1,6 @@
-namespace WinkelDomein;
+using WinkelDomein.Model;
+
+namespace WinkelDomein.Interface;
 
 public interface IBetaalTerminal
 {

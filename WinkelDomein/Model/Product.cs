@@ -5,7 +5,7 @@
         private readonly decimal _price;
         private readonly int _btw;
 
-        public Product(string code, string name, decimal price, int btw = 21) {
+        public Product(string code, string name, decimal price, int btw) {
             Code = code;
             Name = name;
             Price = price;

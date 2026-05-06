@@ -1,5 +1,5 @@
 using static System.Console;
-using WinkelDomein.Model;
+using WinkelDomein;
 
 namespace KassaApp;
 

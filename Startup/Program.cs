@@ -1,7 +1,7 @@
 ﻿using BetaalSysteemMock;
 using KassaApp;
+using WinkelDomein;
 using WinkelDomein.Interface;
-using WinkelDomein.Model;
 
 namespace Startup {
     internal class Program {

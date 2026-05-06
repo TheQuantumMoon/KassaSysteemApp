@@ -28,6 +28,12 @@
         public void IncreaseAmountOfProduct(GescandProduct gescandProduct, int amount) {
             gescandProduct.Quantity += amount;
         }
+        public void IncreaseAmountOfLastProduct(int amount) {
+            if (Products.Count != 0) {
+                GescandProduct product = Products[^1];
+                product.Quantity += amount;
+            } else throw new ArgumentException("Er zijn nog geen producten ingescand");
+        }
         public void DiminishAmountOfProduct(GescandProduct gescandProduct, int amount) {
             gescandProduct.Quantity -= amount;
         }

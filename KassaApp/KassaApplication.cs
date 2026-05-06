@@ -18,13 +18,48 @@ public class KassaApplication {
             DisplayTicket(kassaTicket);
             string input = ReadLine()!.Trim().ToUpper();
 
-            // Check of het een productcode is, zoja, voeg het product toe aan het ticket
+            // Check of de input een productcode is, zoja, voeg het product toe aan het ticket
             Product? product = _kassa.GetProductByCode(input);
             if (product != null) {
                 kassaTicket.AddProduct(product);
                 continue;
             }
 
+            // Check of de input een int is, zoja pas het aantal van het laast ingegeven product aan
+            bool isInt = int.TryParse(input, out int amount);
+            if (isInt) {
+                try { kassaTicket.IncreaseAmountOfLastProduct(amount); }
+                catch (Exception ex) { WriteLine(ex.Message); }
+                continue;
+            }
+
+            // Check of de input een van de optie letters is
+            switch (input) {
+                // Verwijderen
+                case "D":
+                    break;
+
+                case "Z":
+                    break;
+
+                case "K":
+                    break;
+
+                case "C":
+                    break;
+
+                case "P":
+                    break;
+
+                case "H":
+                    break;
+
+                case "A":
+                    break;
+
+                default:
+                    break;
+            }
 
         }
     }

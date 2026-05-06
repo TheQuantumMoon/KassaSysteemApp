@@ -37,6 +37,11 @@ public class KassaApplication {
             switch (input) {
                 // Verwijderen
                 case "D":
+                    Write("Barcode: ");
+                    input = ReadLine()!.Trim();
+                    product = _kassa.GetProductByCode(input);
+                    try { kassaTicket.RemoveProduct(product); }
+                    catch (ArgumentNullException ex) { WriteLine(ex.ParamName); }
                     break;
 
                 case "Z":
@@ -113,7 +118,7 @@ public class KassaApplication {
         WriteLine("<scan barcode> of [barcode]<Enter> | [aantal extra]<Enter>\n" +
             "[D]<Enter> = verwijderen | [Z]<Enter> = undo-laatste\n" +
             "[K]<Enter> = betalen met Kaart | [C]<Enter> = betaald met Cash\n" +
-            "[P]<Enter> = parkeren | [H]<Enter> = hervatten | [A]<Enter> = afbreken\n");
+            "[P]<Enter> = parkeren | [H]<Enter> = hervatten | [A]<Enter> = afbreken");
         ResetColor();
     }
 }

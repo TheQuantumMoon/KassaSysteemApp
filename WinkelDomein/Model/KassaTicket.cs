@@ -13,20 +13,26 @@
             get => DateTime.Now.ToString("yyyy-MM-dd HH:mm");
         }
 
-        public void AddProduct(Product product, int amount = 1) {
+        public void AddProduct(Product? product, int amount = 1) {
+            if (product == null) throw new ArgumentNullException("Dit product bestaat niet");
             GescandProduct foundGescandProduct = _products.Find((gescandProduct) => gescandProduct.Product == product)!;
             if (foundGescandProduct == default) {
                 GescandProduct newGescandProduct = new(product, amount);
                 _products.Add(newGescandProduct);
             } else {
-                IncreaseAmountOfProduct(foundGescandProduct, amount);
+                foundGescandProduct.Quantity += amount;
             }
         }
-        public void RemoveProduct(GescandProduct gescandProduct) {
-            _products.Remove(gescandProduct);
-        }
-        public void IncreaseAmountOfProduct(GescandProduct gescandProduct, int amount) {
-            gescandProduct.Quantity += amount;
+        public void RemoveProduct(Product? product, int amount = 1) {
+            if (product == null) throw new ArgumentNullException("Dit product bestaat niet");
+            GescandProduct foundGescandProduct = _products.Find((gescandProduct) => gescandProduct.Product == product)!;
+            if (foundGescandProduct == default) {
+                throw new ArgumentNullException("Het kassaticket bevat dit product niet");
+            } else if (foundGescandProduct.Quantity <= amount) {
+                Products.Remove(foundGescandProduct);
+            } else {
+                foundGescandProduct.Quantity -= amount;
+            }
         }
         public void IncreaseAmountOfLastProduct(int amount) {
             if (Products.Count != 0) {

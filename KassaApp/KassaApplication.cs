@@ -1,5 +1,6 @@
 using static System.Console;
 using WinkelDomein;
+using WinkelDomein.Model;
 
 namespace KassaApp;
 
@@ -14,14 +15,14 @@ public class KassaApplication
 
     public void StartApplication()
     {
+
         DisplayTicket();
-        ReadKey();
     }
 
-    public static void DisplayTicket(int ticketWidth = 42, int paddingLeft = 2) {
-        
-        string ticketCode = DateTime.Now.ToString("yyyy.MM.dd.HH.mm.ss.fff");
-        string date = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+    public static void DisplayTicket(KassaTicket ticket, int ticketWidth = 42, int paddingLeft = 2) {
+
+        string ticketCode = ticket.TicketCode;
+        string date = ticket.Date;
 
         PrintThickLine(ticketWidth);
         PrintTicketHeader(ticketWidth);

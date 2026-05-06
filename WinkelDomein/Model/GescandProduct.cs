@@ -24,5 +24,9 @@ namespace WinkelDomein.Model {
                 _quantity = value;
             } 
         }
+
+        public override string ToString() {
+            return $"{Quantity}x {Product.Name} €{Product.Price} {Product.Btw}%";
+        }
     }
 }

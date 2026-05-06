@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace WinkelDomein.Model {
+﻿namespace WinkelDomein.Model {
     public class KassaTicket {
 
         private readonly List<GescandProduct> _products = [];
@@ -14,11 +10,17 @@ namespace WinkelDomein.Model {
             get => DateTime.Now.ToString("yyyy.MM.dd.HH.mm.ss.fff");
         }
         public string Date {
-            get =>  DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+            get => DateTime.Now.ToString("yyyy-MM-dd HH:mm");
         }
 
-        public void AddProduct(GescandProduct gescandProduct) {
-            _products.Add(gescandProduct);
+        public void AddProduct(Product product, int amount = 1) {
+            GescandProduct foundGescandProduct = _products.Find((gescandProduct) => gescandProduct.Product == product)!;
+            if (foundGescandProduct == default) {
+                GescandProduct newGescandProduct = new(product, amount);
+                _products.Add(newGescandProduct);
+            } else {
+                IncreaseAmountOfProduct(foundGescandProduct, amount);
+            }
         }
         public void RemoveProduct(GescandProduct gescandProduct) {
             _products.Remove(gescandProduct);

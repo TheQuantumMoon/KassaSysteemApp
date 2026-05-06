@@ -1,11 +1,10 @@
-using static System.Console;
 using WinkelDomein;
 using WinkelDomein.Model;
+using static System.Console;
 
 namespace KassaApp;
 
-public class KassaApplication
-{
+public class KassaApplication {
     private readonly Kassa _kassa;
 
     public KassaApplication(Kassa kassa) {
@@ -13,24 +12,33 @@ public class KassaApplication
         StartApplication();
     }
 
-    public void StartApplication()
-    {
+    public void StartApplication() {
+        KassaTicket kassaTicket = _kassa.GenerateNewKassaTicket();
+        while (true) {
+            DisplayTicket(kassaTicket);
+            string input = ReadLine()!.Trim().ToUpper();
 
-        DisplayTicket();
+            // Check of het een productcode is, zoja, voeg het product toe aan het ticket
+            Product? product = _kassa.GetProductByCode(input);
+            if (product != null) {
+                kassaTicket.AddProduct(product);
+                continue;
+            }
+
+
+        }
     }
 
-    public static void DisplayTicket(KassaTicket ticket, int ticketWidth = 42, int paddingLeft = 2) {
+    public static void DisplayTicket(KassaTicket ticket, int ticketWidth = 50, int paddingLeft = 2) {
 
-        string ticketCode = ticket.TicketCode;
-        string date = ticket.Date;
-
+        WriteLine();
         PrintThickLine(ticketWidth);
         PrintTicketHeader(ticketWidth);
         PrintThickLine(ticketWidth);
-        WriteLineLeftPadding($"Ticket: {ticketCode}", paddingLeft);
-        WriteLineLeftPadding($"Datum: {date}", paddingLeft);
+        WriteLineLeftPadding($"Ticket: {ticket.TicketCode}", paddingLeft);
+        WriteLineLeftPadding($"Datum: {ticket.Date}", paddingLeft);
         PrintThinLine(ticketWidth);
-        WriteLineLeftPadding("(leeg)", paddingLeft);
+        PrintGescandeProducten(ticket.Products, paddingLeft);
         PrintThickLine(ticketWidth);
         WriteLine();
         PrintUserInstructions();
@@ -58,6 +66,13 @@ public class KassaApplication
         WriteLineCenter("Tel: 09 234 56 78", ticketWidth);
         WriteLineCenter("BTW: BE 0123.456.789", ticketWidth);
     }
+    public static void PrintGescandeProducten(List<GescandProduct> products, int paddingLeft = 0) {
+        if (products.Count != 0) {
+            foreach (var product in products) WriteLineLeftPadding(product.ToString(), paddingLeft);
+        } else {
+            WriteLineLeftPadding("(leeg)", paddingLeft);
+        }
+    }
     public static void PrintUserInstructions() {
         ForegroundColor = ConsoleColor.DarkGray;
         WriteLine("<scan barcode> of [barcode]<Enter> | [aantal extra]<Enter>\n" +
@@ -67,4 +82,3 @@ public class KassaApplication
         ResetColor();
     }
 }
- 

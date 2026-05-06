@@ -15,8 +15,9 @@ public class KassaApplication {
     public void StartApplication() {
         KassaTicket kassaTicket = _kassa.GenerateNewKassaTicket();
         while (true) {
+            //Clear();
             DisplayTicket(kassaTicket);
-            string input = ReadLine()!.Trim().ToUpper();
+            string input = AskInput().Trim().ToUpper();
 
             // Check of de input een productcode is, zoja, voeg het product toe aan het ticket
             Product? product = _kassa.GetProductByCode(input);
@@ -29,7 +30,7 @@ public class KassaApplication {
             bool isInt = int.TryParse(input, out int amount);
             if (isInt) {
                 try { kassaTicket.IncreaseLastProduct(amount); }
-                catch (ArgumentException ex) { WriteLine(ex.Message); }
+                catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                 continue;
             }
 
@@ -41,16 +42,19 @@ public class KassaApplication {
                     input = ReadLine()!.Trim();
                     product = _kassa.GetProductByCode(input);
                     try { kassaTicket.DiminishProduct(product); }
-                    catch (ArgumentException ex) { WriteLine(ex.Message); }
+                    catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     break;
 
                 // Verwijder laast toegevoegde product
                 case "Z":
                     try { kassaTicket.DiminishLastProduct(); }
-                    catch (ArgumentException ex) { WriteLine(ex.Message); }
+                    catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     break;
 
+                // Betalen met kaart
                 case "K":
+                    BetaalDetails? result = _kassa.VerzoekBetaling(kassaTicket.TotalPrice, "Betaling met de kaart");
+                    ProcessPayment(result);
                     break;
 
                 case "C":
@@ -72,7 +76,7 @@ public class KassaApplication {
         }
     }
 
-    public static void DisplayTicket(KassaTicket ticket, int ticketWidth = 50, int paddingLeft = 2) {
+    public static void DisplayTicket(KassaTicket ticket, int ticketWidth = 42, int paddingLeft = 2) {
 
         WriteLine();
         PrintThickLine(ticketWidth);
@@ -81,7 +85,7 @@ public class KassaApplication {
         WriteLineLeftPadding($"Ticket: {ticket.TicketCode}", paddingLeft);
         WriteLineLeftPadding($"Datum: {ticket.Date}", paddingLeft);
         PrintThinLine(ticketWidth);
-        PrintGescandeProducten(ticket.Products, paddingLeft);
+        PrintGescandeProducten(ticket, ticketWidth, paddingLeft);
         PrintThickLine(ticketWidth);
         WriteLine();
         PrintUserInstructions();
@@ -95,6 +99,16 @@ public class KassaApplication {
         int calculatedPadding = text.Length + padding;
         WriteLine(text.PadLeft(calculatedPadding));
     }
+    public static void WriteInColor(string text, ConsoleColor color) {
+        ForegroundColor = color;
+        Write(text);
+        ResetColor();
+    }
+    public static void WriteLineInColor(string text, ConsoleColor color) {
+        ForegroundColor = color;
+        WriteLine(text);
+        ResetColor();
+    }
     public static void PrintThinLine(int length) {
         string thinLine = new('-', length);
         WriteLine(thinLine);
@@ -104,14 +118,20 @@ public class KassaApplication {
         WriteLine(thickLine);
     }
     public static void PrintTicketHeader(int ticketWidth) {
-        WriteLineCenter("WARENHUIS OVERFLOW", ticketWidth);
-        WriteLineCenter("Stapelplein 1, 9000 Gent", ticketWidth);
-        WriteLineCenter("Tel: 09 234 56 78", ticketWidth);
-        WriteLineCenter("BTW: BE 0123.456.789", ticketWidth);
+        WriteLineCenter(KassaTicket.SHOPNAME, ticketWidth);
+        WriteLineCenter(KassaTicket.ADDRES, ticketWidth);
+        WriteLineCenter(KassaTicket.TEL, ticketWidth);
+        WriteLineCenter(KassaTicket.BTWNUMBER, ticketWidth);
     }
-    public static void PrintGescandeProducten(List<GescandProduct> products, int paddingLeft = 0) {
+    public static void PrintGescandeProducten(KassaTicket ticket, int ticketWidth, int paddingLeft) {
+        List<GescandProduct> products = ticket.Products;
         if (products.Count != 0) {
             foreach (var product in products) WriteLineLeftPadding(product.ToString(), paddingLeft);
+            PrintThinLine(ticketWidth);
+            WriteLineLeftPadding("Subtotaal excl. BTW:\t€   " + ticket.TotalPrice, paddingLeft);
+            WriteLineLeftPadding("--> BTW:\t\t€   " + ticket.TotalBtw, paddingLeft + 2);
+            PrintThinLine(ticketWidth);
+            WriteLineLeftPadding("TOTAAL:\t\t€   " + (ticket.TotalPrice + ticket.TotalBtw), paddingLeft);
         } else {
             WriteLineLeftPadding("(leeg)", paddingLeft);
         }
@@ -123,5 +143,37 @@ public class KassaApplication {
             "[K]<Enter> = betalen met Kaart | [C]<Enter> = betaald met Cash\n" +
             "[P]<Enter> = parkeren | [H]<Enter> = hervatten | [A]<Enter> = afbreken");
         ResetColor();
+    }
+    public static string AskInput() {
+        Write("> ");
+        ForegroundColor = ConsoleColor.Yellow;
+        string input = ReadLine()!;
+        ResetColor();
+        return input;
+    }
+
+    public static void ProcessPayment(BetaalDetails? result) {
+        if (result == null) {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Betaling mislukt of geweigerd.");
+            Console.ResetColor();
+        } else {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Betaling geslaagd!");
+            Console.ResetColor();
+            Console.WriteLine($"  Kaart:      {result.KaartType} {result.KaartVariant}");
+            Console.WriteLine($"  Nummer:     {result.GemaskerdKaartnummer}");
+            Console.WriteLine($"  Methode:    {result.Methode}");
+            Console.WriteLine($"  Bedrag:     €{result.Bedrag:F2}");
+            Console.WriteLine($"  Referentie: {result.TransactieReferentie}");
+            Console.WriteLine($"  Tijdstip:   {result.Tijdstip:yyyy-MM-dd HH:mm:ss}");
+        }
+
+        // ─── Stap 2: Snelle terminal voor bulktesten ────────────────────
+
+        Console.WriteLine();
+        Console.WriteLine("── Test 2: 20 snelle pogingen (50-200ms) ──");
+        Console.WriteLine("   (~10% kans op weigering per poging)");
+        Console.WriteLine();
     }
 }

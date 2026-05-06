@@ -8,8 +8,7 @@ namespace BetaalSysteemMock;
 /// De verwerkingstijd is configureerbaar via de constructor.
 /// Geen console-output: de UI-laag is verantwoordelijk voor weergave.
 /// </summary>
-public class MockBetaalTerminal : IBetaalTerminal
-{
+public class MockBetaalTerminal : IBetaalTerminal {
     private readonly Random _random = new();
     private readonly int _minWachtMs;
     private readonly int _maxWachtMs;
@@ -36,14 +35,12 @@ public class MockBetaalTerminal : IBetaalTerminal
     /// </summary>
     /// <param name="minWachtMs">Minimale wachttijd in milliseconden (standaard 3000).</param>
     /// <param name="maxWachtMs">Maximale wachttijd in milliseconden (standaard 30000).</param>
-    public MockBetaalTerminal(int minWachtMs = 3000, int maxWachtMs = 30000)
-    {
+    public MockBetaalTerminal(int minWachtMs = 3000, int maxWachtMs = 30000) {
         _minWachtMs = minWachtMs;
         _maxWachtMs = maxWachtMs;
     }
 
-    public BetaalDetails? VerzoekBetaling(decimal bedrag, string boodschap)
-    {
+    public BetaalDetails? VerzoekBetaling(decimal bedrag, string boodschap) {
         int wachtMs = _minWachtMs + _random.Next(_maxWachtMs - _minWachtMs);
         Thread.Sleep(wachtMs);
 

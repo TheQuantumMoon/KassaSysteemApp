@@ -13,8 +13,8 @@
             get => DateTime.Now.ToString("yyyy-MM-dd HH:mm");
         }
 
-        public void AddProduct(Product? product, int amount = 1) {
-            if (product == null) throw new ArgumentNullException("Dit product bestaat niet");
+        public void IncreaseProduct(Product? product, int amount = 1) {
+            if (product == null) throw new ArgumentException(message: "Dit product bestaat niet");
             GescandProduct foundGescandProduct = _products.Find((gescandProduct) => gescandProduct.Product == product)!;
             if (foundGescandProduct == default) {
                 GescandProduct newGescandProduct = new(product, amount);
@@ -23,26 +23,26 @@
                 foundGescandProduct.Quantity += amount;
             }
         }
-        public void RemoveProduct(Product? product, int amount = 1) {
-            if (product == null) throw new ArgumentNullException("Dit product bestaat niet");
+        public void DiminishProduct(Product? product, int amount = 1) {
+            if (product == null) throw new ArgumentException(message: "Dit product bestaat niet");
             GescandProduct foundGescandProduct = _products.Find((gescandProduct) => gescandProduct.Product == product)!;
             if (foundGescandProduct == default) {
-                throw new ArgumentNullException("Het kassaticket bevat dit product niet");
+                throw new ArgumentException(message: "Het kassaticket bevat dit product niet");
             } else if (foundGescandProduct.Quantity <= amount) {
                 Products.Remove(foundGescandProduct);
             } else {
                 foundGescandProduct.Quantity -= amount;
             }
         }
-        public void IncreaseAmountOfLastProduct(int amount) {
-            if (Products.Count != 0) {
-                GescandProduct product = Products[^1];
-                product.Quantity += amount;
-            } else throw new ArgumentException("Er zijn nog geen producten ingescand");
+        public void IncreaseLastProduct(int amount = 1) {
+            if (Products.Count == 0) throw new ArgumentException(message: "Er zijn nog geen producten ingescand");
+            GescandProduct gescandProduct = Products[^1];
+            IncreaseProduct(gescandProduct.Product, amount);
         }
-        public void DiminishAmountOfProduct(GescandProduct gescandProduct, int amount) {
-            gescandProduct.Quantity -= amount;
+        public void DiminishLastProduct(int amount = 1) {
+            if (Products.Count == 0) throw new ArgumentException(message: "Er zijn nog geen producten ingescand");
+            GescandProduct gescandProduct = Products[^1];
+            DiminishProduct(gescandProduct.Product, amount);
         }
-
     }
 }

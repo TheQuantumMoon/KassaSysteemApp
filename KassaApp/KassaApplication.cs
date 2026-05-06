@@ -21,15 +21,15 @@ public class KassaApplication {
             // Check of de input een productcode is, zoja, voeg het product toe aan het ticket
             Product? product = _kassa.GetProductByCode(input);
             if (product != null) {
-                kassaTicket.AddProduct(product);
+                kassaTicket.IncreaseProduct(product);
                 continue;
             }
 
             // Check of de input een int is, zoja pas het aantal van het laast ingegeven product aan
             bool isInt = int.TryParse(input, out int amount);
             if (isInt) {
-                try { kassaTicket.IncreaseAmountOfLastProduct(amount); }
-                catch (Exception ex) { WriteLine(ex.Message); }
+                try { kassaTicket.IncreaseLastProduct(amount); }
+                catch (ArgumentException ex) { WriteLine(ex.Message); }
                 continue;
             }
 
@@ -40,11 +40,14 @@ public class KassaApplication {
                     Write("Barcode: ");
                     input = ReadLine()!.Trim();
                     product = _kassa.GetProductByCode(input);
-                    try { kassaTicket.RemoveProduct(product); }
-                    catch (ArgumentNullException ex) { WriteLine(ex.ParamName); }
+                    try { kassaTicket.DiminishProduct(product); }
+                    catch (ArgumentException ex) { WriteLine(ex.Message); }
                     break;
 
+                // Verwijder laast toegevoegde product
                 case "Z":
+                    try { kassaTicket.DiminishLastProduct(); }
+                    catch (ArgumentException ex) { WriteLine(ex.Message); }
                     break;
 
                 case "K":

@@ -13,16 +13,14 @@ namespace WinkelDomein.Model {
         public List<GescandProduct> Products {
             get => _scannedProducts;
         }
-        public string TicketCode {
-            get => DateTime.Now.ToString("yyyy.MM.dd.HH.mm.ss.fff");
-        }
-        public string Date {
-            get => DateTime.Now.ToString("yyyy-MM-dd HH:mm");
-        }
+        public static string TicketCode => DateTime.Now.ToString("yyyy.MM.dd.HH.mm.ss.fff");
+        public static string Date => DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+        public static string CashRef => "CASH-" + DateTime.Now.ToString("yyyyMMdd-mssfff");
+
         public bool HasScannedProducts {
             get => _scannedProducts.Count != 0;
         }
-        public decimal TotalPrice {
+        public decimal TotalPriceNoBtw {
             get {
                 if (_scannedProducts.Count == 0) return 0m;
                 decimal totalPrice = 0m;
@@ -42,6 +40,7 @@ namespace WinkelDomein.Model {
                 return Math.Round(totalPrice, 2);
             }
         }
+        public decimal TotalPrice => TotalPriceNoBtw + TotalBtw;
 
         public void IncreaseProduct(Product? product, int amount = 1) {
             if (product == null) throw new ArgumentException(message: "Dit product bestaat niet");

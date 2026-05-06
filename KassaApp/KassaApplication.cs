@@ -1,4 +1,5 @@
 using WinkelDomein;
+using WinkelDomein.Enum;
 using WinkelDomein.Model;
 using static System.Console;
 
@@ -15,7 +16,8 @@ public class KassaApplication {
     public void StartApplication() {
         KassaTicket kassaTicket = _kassa.GenerateNewKassaTicket();
         while (true) {
-            //Clear();
+            if (!_kassa.HasTickets) kassaTicket = _kassa.GenerateNewKassaTicket();
+
             DisplayTicket(kassaTicket);
             string input = AskInput().Trim().ToUpper();
 
@@ -29,8 +31,7 @@ public class KassaApplication {
             // Check of de input een int is, zoja pas het aantal van het laast ingegeven product aan
             bool isInt = int.TryParse(input, out int amount);
             if (isInt) {
-                try { kassaTicket.IncreaseLastProduct(amount); }
-                catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
+                try { kassaTicket.IncreaseLastProduct(amount); } catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                 continue;
             }
 
@@ -41,23 +42,28 @@ public class KassaApplication {
                     Write("Barcode: ");
                     input = ReadLine()!.Trim();
                     product = _kassa.GetProductByCode(input);
-                    try { kassaTicket.DiminishProduct(product); }
-                    catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
+                    try { kassaTicket.DiminishProduct(product); } catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     break;
 
                 // Verwijder laast toegevoegde product
                 case "Z":
-                    try { kassaTicket.DiminishLastProduct(); }
-                    catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
+                    try { kassaTicket.DiminishLastProduct(); } catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     break;
 
                 // Betalen met kaart
                 case "K":
-                    BetaalDetails? result = _kassa.VerzoekBetaling(kassaTicket.TotalPrice, "Betaling met de kaart");
+                    BetaalDetails? result = _kassa.VerzoekBetaling(kassaTicket.TotalPriceNoBtw, "Betaling met de kaart");
                     ProcessPayment(result);
                     break;
 
+                // Betalen met cash
                 case "C":
+                    if (!kassaTicket.HasScannedProducts) {
+                        WriteInColor("Er zijn nog geen ingescande items", ConsoleColor.Red);
+                        continue;
+                    }
+                    DisplayTicket(kassaTicket, TicketSoort.Cash);
+                    _kassa.FinishTicket(kassaTicket);
                     break;
 
                 case "P":
@@ -76,19 +82,33 @@ public class KassaApplication {
         }
     }
 
-    public static void DisplayTicket(KassaTicket ticket, int ticketWidth = 42, int paddingLeft = 2) {
+    public static void DisplayTicket(KassaTicket ticket, TicketSoort soort = TicketSoort.Normaal) {
+        int ticketWidth = 42;
+        int paddingLeft = 2;
 
         WriteLine();
         PrintThickLine(ticketWidth);
         PrintTicketHeader(ticketWidth);
         PrintThickLine(ticketWidth);
-        WriteLineLeftPadding($"Ticket: {ticket.TicketCode}", paddingLeft);
-        WriteLineLeftPadding($"Datum: {ticket.Date}", paddingLeft);
+        WriteLineLeftPadding($"Ticket: {KassaTicket.TicketCode}", paddingLeft);
+        WriteLineLeftPadding($"Datum: {KassaTicket.Date}", paddingLeft);
         PrintThinLine(ticketWidth);
         PrintGescandeProducten(ticket, ticketWidth, paddingLeft);
         PrintThickLine(ticketWidth);
-        WriteLine();
-        PrintUserInstructions();
+        if (soort == TicketSoort.Normaal) {
+            WriteLine();
+            PrintUserInstructions();
+        } else if (soort == TicketSoort.Cash) {
+            WriteLineLeftPadding("Contante betaling", paddingLeft);
+            WriteLineLeftPadding("Bedrag:\t\t€   " + (ticket.TotalPriceNoBtw + ticket.TotalBtw), paddingLeft);
+            WriteLineLeftPadding("Ref: " + KassaTicket.CashRef, paddingLeft);
+            PrintThickLine(ticketWidth);
+            WriteLine();
+            WriteInColorLeftPadding("✓ Betaling ontvangen - €" + ticket.TotalPrice, ConsoleColor.Green, paddingLeft);
+            WriteLine();
+        } else if (soort == TicketSoort.Kaart) {
+
+        }
     }
 
     public static void WriteLineCenter(string text, int totalWidth) {
@@ -102,6 +122,11 @@ public class KassaApplication {
     public static void WriteInColor(string text, ConsoleColor color) {
         ForegroundColor = color;
         Write(text);
+        ResetColor();
+    }
+    public static void WriteInColorLeftPadding(string text, ConsoleColor color, int padding) {
+        ForegroundColor = color;
+        WriteLineLeftPadding(text, padding);
         ResetColor();
     }
     public static void WriteLineInColor(string text, ConsoleColor color) {
@@ -128,10 +153,10 @@ public class KassaApplication {
         if (products.Count != 0) {
             foreach (var product in products) WriteLineLeftPadding(product.ToString(), paddingLeft);
             PrintThinLine(ticketWidth);
-            WriteLineLeftPadding("Subtotaal excl. BTW:\t€   " + ticket.TotalPrice, paddingLeft);
+            WriteLineLeftPadding("Subtotaal excl. BTW:\t€   " + ticket.TotalPriceNoBtw, paddingLeft);
             WriteLineLeftPadding("--> BTW:\t\t€   " + ticket.TotalBtw, paddingLeft + 2);
             PrintThinLine(ticketWidth);
-            WriteLineLeftPadding("TOTAAL:\t\t€   " + (ticket.TotalPrice + ticket.TotalBtw), paddingLeft);
+            WriteLineLeftPadding("TOTAAL:\t\t€   " + (ticket.TotalPriceNoBtw + ticket.TotalBtw), paddingLeft);
         } else {
             WriteLineLeftPadding("(leeg)", paddingLeft);
         }
@@ -144,6 +169,7 @@ public class KassaApplication {
             "[P]<Enter> = parkeren | [H]<Enter> = hervatten | [A]<Enter> = afbreken");
         ResetColor();
     }
+
     public static string AskInput() {
         Write("> ");
         ForegroundColor = ConsoleColor.Yellow;

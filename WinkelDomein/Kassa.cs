@@ -9,6 +9,11 @@ namespace WinkelDomein {
 
         public List<Product> PossibleProducts { get => _possibleProducts; set => _possibleProducts = value; }
 
+        public bool HasTickets {
+            get => _tickets.Count != 0;
+        }
+        public List<KassaTicket> Tickets { get => _tickets; set => _tickets = value; }
+
         public Kassa(IBetaalTerminal betaalTerminal) {
             _betaalTerminal = betaalTerminal;
             StartKassa();
@@ -38,6 +43,11 @@ namespace WinkelDomein {
             KassaTicket newTicket = new();
             _tickets.Add(newTicket);
             return newTicket;
+        }
+
+        public void FinishTicket(KassaTicket ticket) {
+            _tickets.Remove(ticket);
+            // Log ticket
         }
 
         public Product? GetProductByCode(string code) {

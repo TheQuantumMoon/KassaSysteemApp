@@ -59,6 +59,7 @@ namespace WinkelDomein {
         public void RemoveKassaTicket(KassaTicket ticket) {
             bool succes = _tickets.Remove(ticket);
             if (!succes) throw new ArgumentException(message: "Ticket niet verwijderd");
+            Logger.LogCancelTicket(ticket);
         }
 
         public KassaTicket GetTicketByIndex(int index) {

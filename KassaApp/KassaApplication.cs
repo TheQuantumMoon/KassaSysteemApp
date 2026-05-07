@@ -19,6 +19,7 @@ public class KassaApplication {
             if (!_kassa.HasTickets) currentKassaTicket = _kassa.GenerateNewKassaTicket();
 
             DisplayTicket(currentKassaTicket);
+            Write("> ");
             string input = AskInput().Trim().ToUpper();
 
             // Check of de input een productcode is, zoja, voeg het product toe aan het ticket
@@ -40,7 +41,7 @@ public class KassaApplication {
                 // Verwijderen
                 case "D":
                     Write("Barcode: ");
-                    input = ReadLine()!.Trim();
+                    input = AskInput().Trim();
                     product = _kassa.GetProductByCode(input);
                     try { currentKassaTicket.DiminishProduct(product); } catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     break;
@@ -55,7 +56,7 @@ public class KassaApplication {
                     PrintPaymentByCardPrompt(currentKassaTicket);
                     BetaalDetails? result = _kassa.VerzoekBetaling(currentKassaTicket.TotalPrice, "Betaling met de kaart");
                     if (result == null) {
-                        WriteLineInColor("X Betaling mislut", ConsoleColor.Red);
+                        WriteLineInColor("  X Betaling mislukt", ConsoleColor.Red);
                         continue;
                     }
                     DisplayTicket(currentKassaTicket, TicketSoort.Kaart, result);
@@ -65,7 +66,7 @@ public class KassaApplication {
                 // Betalen met cash
                 case "C":
                     if (!currentKassaTicket.HasScannedProducts) {
-                        WriteInColor("Er zijn nog geen ingescande items", ConsoleColor.Red);
+                        WriteInColor("  Er zijn nog geen ingescande items", ConsoleColor.Red);
                         continue;
                     }
                     DisplayTicket(currentKassaTicket, TicketSoort.Cash);
@@ -79,6 +80,17 @@ public class KassaApplication {
                     break;
 
                 case "H":
+                    List<KassaTicket> currentTickets = _kassa.Tickets;
+                    WriteLine("  Gepakeerde tickets:");
+                    for (int i = 0; i < currentTickets.Count; i++) WriteLine($"    {i + 1}. {currentTickets[i]}");
+                    Write("Keuze: ");
+                    input = AskInput().Trim();
+                    isInt = int.TryParse(input, out int choice);
+                    if (!isInt || choice < 1 || choice > currentTickets.Count) {
+                        WriteLineInColor("Verkeerde input", ConsoleColor.Red);
+                        continue;
+                    }
+                    currentKassaTicket = currentTickets[choice - 1];
                     break;
 
                 case "A":
@@ -87,7 +99,7 @@ public class KassaApplication {
                     break;
 
                 default:
-                    WriteLineInColor("Input niet herkend", ConsoleColor.Red);
+                    WriteLineInColor("  Input niet herkend", ConsoleColor.Red);
                     break;
             }
 
@@ -102,8 +114,8 @@ public class KassaApplication {
         PrintThickLine(ticketWidth);
         PrintTicketHeader(ticketWidth);
         PrintThickLine(ticketWidth);
-        WriteLineLeftPadding($"Ticket: {KassaTicket.TicketCode}", paddingLeft);
-        WriteLineLeftPadding($"Datum: {KassaTicket.Date}", paddingLeft);
+        WriteLineLeftPadding($"Ticket: {ticket.TicketCode}", paddingLeft);
+        WriteLineLeftPadding($"Datum: {ticket.Date}", paddingLeft);
         PrintThinLine(ticketWidth);
         PrintScannedProducts(ticket, ticketWidth, paddingLeft);
         PrintThickLine(ticketWidth);
@@ -113,7 +125,7 @@ public class KassaApplication {
         } else if (soort == TicketSoort.Cash) {
             WriteLineLeftPadding("Contante betaling", paddingLeft);
             WriteLineLeftPadding("Bedrag:\t\t€   " + ticket.TotalPrice, paddingLeft);
-            WriteLineLeftPadding("Ref: " + KassaTicket.CashRef, paddingLeft);
+            WriteLineLeftPadding("Ref: " + ticket.CashRef, paddingLeft);
             PrintThickLine(ticketWidth);
             WriteLine();
             WriteInColorLeftPadding("✓ Betaling ontvangen - €" + ticket.TotalPrice, ConsoleColor.Green, paddingLeft);
@@ -199,7 +211,6 @@ public class KassaApplication {
     }
 
     public static string AskInput() {
-        Write("> ");
         ForegroundColor = ConsoleColor.Yellow;
         string input = ReadLine()!;
         ResetColor();

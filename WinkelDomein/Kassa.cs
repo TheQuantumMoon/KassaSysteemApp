@@ -49,7 +49,12 @@ namespace WinkelDomein {
         }
 
         public void RemoveKassaTicket(KassaTicket ticket) {
-            _tickets.Remove(ticket);
+            bool succes = _tickets.Remove(ticket);
+            if (!succes) throw new ArgumentException(message: "Ticket niet verwijderd");
+        }
+
+        public KassaTicket GetTicketByIndex(int index) {
+            return _tickets[index];
         }
 
         public KassaTicket GetLastTicket() {
@@ -58,7 +63,8 @@ namespace WinkelDomein {
         }
 
         public void FinishTicket(KassaTicket ticket) {
-            _tickets.Remove(ticket);
+            bool succes = _tickets.Remove(ticket);
+            if (!succes) throw new ArgumentException(message: "Ticket niet afegrond");
             // Log ticket
         }
 

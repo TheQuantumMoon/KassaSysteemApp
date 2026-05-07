@@ -3,23 +3,42 @@
 namespace WinkelDomein.Model {
     public class KassaTicket {
 
+        private static readonly Random _random = new(DateTime.Now.Millisecond);
         private readonly List<GescandProduct> _scannedProducts = [];
+
+        private readonly string _ticketCode = "";
+        private readonly string _date = "";
+        private readonly string _cashRef = "";
 
         public static readonly string SHOPNAME = "WARENHUIS OVERFLOW";
         public static readonly string ADDRES = "Stapelplein 1, 9000 Gent";
         public static readonly string TEL = "Tel: 09 234 56 78";
         public static readonly string BTWNUMBER = "BTW: BE 0123.456.789";
 
-        public List<GescandProduct> Products {
-            get => _scannedProducts;
+        public KassaTicket() {
+            DateTime now = DateTime.Now;
+            TicketCode = now.ToString("yyyy.MM.dd.HH.mm.ss.fff");
+            Date = now.ToString("yyyy-MM-dd HH:mm");
+            CashRef = $"CASH-{now:yyyyMMdd}-{_random.Next(100000, 999999)}";
         }
-        public static string TicketCode => DateTime.Now.ToString("yyyy.MM.dd.HH.mm.ss.fff");
-        public static string Date => DateTime.Now.ToString("yyyy-MM-dd HH:mm");
-        public static string CashRef => "CASH-" + DateTime.Now.ToString("yyyyMMdd-mssfff");
 
-        public bool HasScannedProducts {
-            get => _scannedProducts.Count != 0;
+        public string TicketCode {
+            get => _ticketCode;
+            init => _ticketCode = value;
         }
+        public string Date {
+            get => _date;
+            init => _date = value;
+        }
+        public string CashRef {
+            get => _cashRef;
+            init => _cashRef = value;
+        }
+
+        public List<GescandProduct> Products => _scannedProducts;
+        public bool HasScannedProducts => _scannedProducts.Count != 0;
+        public int AmountOfProducts => _scannedProducts.Count;
+
         public decimal TotalPriceNoBtw {
             get {
                 if (_scannedProducts.Count == 0) return 0m;
@@ -72,6 +91,10 @@ namespace WinkelDomein.Model {
             if (Products.Count == 0) throw new ArgumentException(message: "Er zijn nog geen producten ingescand");
             GescandProduct gescandProduct = Products[^1];
             DiminishProduct(gescandProduct.Product, amount);
+        }
+
+        public override string ToString() {
+            return $"#{TicketCode} ({AmountOfProducts} producten)";
         }
     }
 }

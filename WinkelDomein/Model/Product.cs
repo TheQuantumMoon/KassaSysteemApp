@@ -41,6 +41,10 @@
                 _btw = value;
             }
         }
+
+        public override string ToString() {
+            return $"{Name} ({Code})";
+        }
     }
 }
 

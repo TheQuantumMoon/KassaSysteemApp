@@ -9,12 +9,12 @@ namespace Startup {
         static void Main() {
 
             Console.OutputEncoding = Encoding.UTF8;
+            Logger.StartLogger();
 
             IBetaalTerminal snelleTerminal = new MockBetaalTerminal(50, 200);
             Kassa kassa = new(snelleTerminal);
             KassaApplication _ = new(kassa);
 
-            Console.ReadKey();
         }
     }
 }

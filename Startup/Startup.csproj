@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="bin\Debug\net10.0\Log.txt" />
+    <Content Include="bin\Debug\net10.0\Producten.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BetaalSysteemMock\BetaalSysteemMock.csproj" />
     <ProjectReference Include="..\KassaApp\KassaApp.csproj" />
     <ProjectReference Include="..\WinkelDomein\WinkelDomein.csproj" />

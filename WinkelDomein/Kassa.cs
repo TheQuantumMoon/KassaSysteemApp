@@ -15,6 +15,7 @@ namespace WinkelDomein {
         public int TicketCount {
             get => _tickets.Count;
         }
+        public int PossibleProductsCount => _possibleProducts.Count;
         public List<KassaTicket> Tickets { get => _tickets; set => _tickets = value; }
 
         public Kassa(IBetaalTerminal betaalTerminal) {
@@ -24,11 +25,12 @@ namespace WinkelDomein {
 
         private void StartKassa() {
             ParsePossibleProducts();
-
+            Logger.SystemLog(PossibleProductsCount + " producten ingeladen.");
+            Logger.SystemLog("Geen kortingscodes beschikbaar.");
         }
 
         private void ParsePossibleProducts() {
-            string productsFilepath = @".\..\..\..\..\Producten.txt";
+            string productsFilepath = @"Producten.txt";
             string[] rawProducts = File.ReadAllLines(productsFilepath);
 
             foreach (var line in rawProducts) {
@@ -45,6 +47,7 @@ namespace WinkelDomein {
         public KassaTicket GenerateNewKassaTicket() {
             KassaTicket newTicket = new();
             _tickets.Add(newTicket);
+            Logger.LogNewTicket(newTicket);
             return newTicket;
         }
 

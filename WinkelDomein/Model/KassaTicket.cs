@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-
-namespace WinkelDomein.Model {
+﻿namespace WinkelDomein.Model {
     public class KassaTicket {
 
         private static readonly Random _random = new(DateTime.Now.Millisecond);
@@ -70,6 +68,7 @@ namespace WinkelDomein.Model {
             } else {
                 foundGescandProduct.Quantity += amount;
             }
+            Logger.LogScan(this, product, amount);
         }
         public void DiminishProduct(Product? product, int amount = 1) {
             if (product == null) throw new ArgumentException(message: "Dit product bestaat niet");

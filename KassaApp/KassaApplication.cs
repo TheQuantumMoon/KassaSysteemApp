@@ -76,7 +76,7 @@ public class KassaApplication {
 
                 // Ticket parkeren
                 case "P":
-                    currentKassaTicket = _kassa.GenerateNewKassaTicket();
+                    currentKassaTicket = _kassa.ParkKassaTicket(currentKassaTicket);
                     break;
 
                 case "H":

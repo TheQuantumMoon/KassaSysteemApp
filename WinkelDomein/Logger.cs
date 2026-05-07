@@ -26,6 +26,11 @@ namespace WinkelDomein {
             File.AppendAllText(_logFilePath, message + Environment.NewLine);
         }
 
+        public static void LogParkTicket(KassaTicket kassaTicket) {
+            string message = $"{Now} [KASSA] PARKEREN ticket {kassaTicket.TicketCode}";
+            File.AppendAllText(_logFilePath, message + Environment.NewLine);
+        }
+
         public static void LogScanProduct(KassaTicket kassaTicket, Product product, int amount) {
             string message = $"{Now} [KASSA] SCAN {amount}x {product} op ticket {kassaTicket.TicketCode}";
             File.AppendAllText(_logFilePath, message + Environment.NewLine);

@@ -51,6 +51,11 @@ namespace WinkelDomein {
             return newTicket;
         }
 
+        public KassaTicket ParkKassaTicket(KassaTicket kassaTicket) {
+            Logger.LogParkTicket(kassaTicket);
+            return GenerateNewKassaTicket();
+        }
+
         public void RemoveKassaTicket(KassaTicket ticket) {
             bool succes = _tickets.Remove(ticket);
             if (!succes) throw new ArgumentException(message: "Ticket niet verwijderd");

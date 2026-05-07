@@ -70,6 +70,7 @@ public class KassaApplication {
                     }
                     DisplayTicket(currentKassaTicket, TicketSoort.Cash);
                     _kassa.FinishTicket(currentKassaTicket);
+                    currentKassaTicket = _kassa.GetLastTicket();
                     break;
 
                 // Ticket parkeren
@@ -81,6 +82,8 @@ public class KassaApplication {
                     break;
 
                 case "A":
+                    _kassa.RemoveKassaTicket(currentKassaTicket);
+                    currentKassaTicket = _kassa.GetLastTicket();
                     break;
 
                 default:

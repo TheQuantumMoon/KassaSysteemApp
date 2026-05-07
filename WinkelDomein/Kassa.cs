@@ -48,6 +48,15 @@ namespace WinkelDomein {
             return newTicket;
         }
 
+        public void RemoveKassaTicket(KassaTicket ticket) {
+            _tickets.Remove(ticket);
+        }
+
+        public KassaTicket GetLastTicket() {
+            if (HasTickets) return _tickets[^1];
+            else return default!;
+        }
+
         public void FinishTicket(KassaTicket ticket) {
             _tickets.Remove(ticket);
             // Log ticket

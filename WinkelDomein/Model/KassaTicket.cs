@@ -68,7 +68,7 @@
             } else {
                 foundGescandProduct.Quantity += amount;
             }
-            Logger.LogScan(this, product, amount);
+            Logger.LogScanProduct(this, product, amount);
         }
         public void DiminishProduct(Product? product, int amount = 1) {
             if (product == null) throw new ArgumentException(message: "Dit product bestaat niet");
@@ -77,8 +77,10 @@
                 throw new ArgumentException(message: "Het kassaticket bevat dit product niet");
             } else if (foundGescandProduct.Quantity <= amount) {
                 Products.Remove(foundGescandProduct);
+                Logger.LogRemoveProduct(this, product, foundGescandProduct.Quantity);
             } else {
                 foundGescandProduct.Quantity -= amount;
+                Logger.LogRemoveProduct(this, product, amount);
             }
         }
         public void IncreaseLastProduct(int amount = 1) {

@@ -14,24 +14,24 @@ public class KassaApplication {
     }
 
     public void StartApplication() {
-        KassaTicket kassaTicket = _kassa.GenerateNewKassaTicket();
+        KassaTicket currentKassaTicket = _kassa.GenerateNewKassaTicket();
         while (true) {
-            if (!_kassa.HasTickets) kassaTicket = _kassa.GenerateNewKassaTicket();
+            if (!_kassa.HasTickets) currentKassaTicket = _kassa.GenerateNewKassaTicket();
 
-            DisplayTicket(kassaTicket);
+            DisplayTicket(currentKassaTicket);
             string input = AskInput().Trim().ToUpper();
 
             // Check of de input een productcode is, zoja, voeg het product toe aan het ticket
             Product? product = _kassa.GetProductByCode(input);
             if (product != null) {
-                kassaTicket.IncreaseProduct(product);
+                currentKassaTicket.IncreaseProduct(product);
                 continue;
             }
 
             // Check of de input een int is, zoja pas het aantal van het laast ingegeven product aan
             bool isInt = int.TryParse(input, out int amount);
             if (isInt) {
-                try { kassaTicket.IncreaseLastProduct(amount); } catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
+                try { currentKassaTicket.IncreaseLastProduct(amount); } catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                 continue;
             }
 
@@ -42,37 +42,39 @@ public class KassaApplication {
                     Write("Barcode: ");
                     input = ReadLine()!.Trim();
                     product = _kassa.GetProductByCode(input);
-                    try { kassaTicket.DiminishProduct(product); } catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
+                    try { currentKassaTicket.DiminishProduct(product); } catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     break;
 
                 // Verwijder laast toegevoegde product
                 case "Z":
-                    try { kassaTicket.DiminishLastProduct(); } catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
+                    try { currentKassaTicket.DiminishLastProduct(); } catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     break;
 
                 // Betalen met kaart
                 case "K":
-                    PrintPaymentByCardPrompt(kassaTicket);
-                    BetaalDetails? result = _kassa.VerzoekBetaling(kassaTicket.TotalPrice, "Betaling met de kaart");
+                    PrintPaymentByCardPrompt(currentKassaTicket);
+                    BetaalDetails? result = _kassa.VerzoekBetaling(currentKassaTicket.TotalPrice, "Betaling met de kaart");
                     if (result == null) {
                         WriteLineInColor("X Betaling mislut", ConsoleColor.Red);
                         continue;
                     }
-                    DisplayTicket(kassaTicket, TicketSoort.Kaart, result);
-                    _kassa.FinishTicket(kassaTicket);
+                    DisplayTicket(currentKassaTicket, TicketSoort.Kaart, result);
+                    _kassa.FinishTicket(currentKassaTicket);
                     break;
 
                 // Betalen met cash
                 case "C":
-                    if (!kassaTicket.HasScannedProducts) {
+                    if (!currentKassaTicket.HasScannedProducts) {
                         WriteInColor("Er zijn nog geen ingescande items", ConsoleColor.Red);
                         continue;
                     }
-                    DisplayTicket(kassaTicket, TicketSoort.Cash);
-                    _kassa.FinishTicket(kassaTicket);
+                    DisplayTicket(currentKassaTicket, TicketSoort.Cash);
+                    _kassa.FinishTicket(currentKassaTicket);
                     break;
 
+                // Ticket parkeren
                 case "P":
+                    currentKassaTicket = _kassa.GenerateNewKassaTicket();
                     break;
 
                 case "H":
@@ -82,13 +84,14 @@ public class KassaApplication {
                     break;
 
                 default:
+                    WriteLineInColor("Input niet herkend", ConsoleColor.Red);
                     break;
             }
 
         }
     }
 
-    public static void DisplayTicket(KassaTicket ticket, TicketSoort soort = TicketSoort.Normaal, BetaalDetails? betaalDetails = default) {
+    public void DisplayTicket(KassaTicket ticket, TicketSoort soort = TicketSoort.Normaal, BetaalDetails? betaalDetails = default) {
         int ticketWidth = 42;
         int paddingLeft = 2;
 
@@ -175,13 +178,13 @@ public class KassaApplication {
             WriteLineLeftPadding("(leeg)", paddingLeft);
         }
     }
-    public static void PrintUserInstructions() {
-        ForegroundColor = ConsoleColor.DarkGray;
-        WriteLine("<scan barcode> of [barcode]<Enter> | [aantal extra]<Enter>\n" +
+    public void PrintUserInstructions() {
+        int amountOfTickets = _kassa.TicketCount;
+        if (amountOfTickets > 1) WriteLineInColor($"[{amountOfTickets - 1} geparkeerd]", ConsoleColor.Cyan);
+        WriteLineInColor("<scan barcode> of [barcode]<Enter> | [aantal extra]<Enter>\n" +
             "[D]<Enter> = verwijderen | [Z]<Enter> = undo-laatste\n" +
             "[K]<Enter> = betalen met Kaart | [C]<Enter> = betaald met Cash\n" +
-            "[P]<Enter> = parkeren | [H]<Enter> = hervatten | [A]<Enter> = afbreken");
-        ResetColor();
+            "[P]<Enter> = parkeren | [H]<Enter> = hervatten | [A]<Enter> = afbreken", ConsoleColor.DarkGray);
     }
     public static void PrintPaymentByCardPrompt(KassaTicket kassaTicket) {
         WriteLine("  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓");

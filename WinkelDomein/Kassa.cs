@@ -12,6 +12,9 @@ namespace WinkelDomein {
         public bool HasTickets {
             get => _tickets.Count != 0;
         }
+        public int TicketCount {
+            get => _tickets.Count;
+        }
         public List<KassaTicket> Tickets { get => _tickets; set => _tickets = value; }
 
         public Kassa(IBetaalTerminal betaalTerminal) {

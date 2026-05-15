@@ -80,6 +80,7 @@ public class KassaApplication {
                     currentKassaTicket = _kassa.ParkKassaTicket(currentKassaTicket);
                     break;
 
+                // Ticket hervatten uit lijst van tickets
                 case "H":
                     List<KassaTicket> currentTickets = _kassa.Tickets;
                     WriteLine("  Gepakeerde tickets:");
@@ -94,11 +95,13 @@ public class KassaApplication {
                     currentKassaTicket = _kassa.ResumeTicketByIndex(choice - 1);
                     break;
 
+                // Huidig ticket annuleren (en loggen)
                 case "A":
                     _kassa.RemoveTicket(currentKassaTicket);
                     currentKassaTicket = _kassa.GetLastTicket();
                     break;
 
+                // Fallback voor onverwachte inputs
                 default:
                     WriteLineInColor("  Input niet herkend", ConsoleColor.Red);
                     break;
@@ -106,7 +109,7 @@ public class KassaApplication {
         }
     }
 
-    public void DisplayTicket(KassaTicket ticket, TicketSoort soort = TicketSoort.Normaal, BetaalDetails? betaalDetails = default) {
+    public void DisplayTicket(KassaTicket ticket, TicketSoort soort = TicketSoort.Normaal, BetaalDetails? betaalDetails = null) {
         int ticketWidth = 42;
         int paddingLeft = 2;
 
@@ -151,9 +154,10 @@ public class KassaApplication {
             "[P]<Enter> = parkeren | [H]<Enter> = hervatten | [A]<Enter> = afbreken", ConsoleColor.DarkGray);
     }
     public static void PrintPaymentByCardPrompt(KassaTicket kassaTicket) {
+        string priceInfo = $"Bedrag: €   {kassaTicket.TotalPrice}";
         WriteLine("  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓");
         WriteLine("  ┃       BETAALTERMINAL        ┃");
-        WriteLine($"  ┃   Bedrag: €   {kassaTicket.TotalPrice}         ┃");
+        WriteLine($"  ┃   {priceInfo,-26}┃");
         WriteLine("  ┃   Bied uw kaart aan...      ┃");
         WriteLine("  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛");
 

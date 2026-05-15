@@ -7,10 +7,10 @@ namespace WinkelDomein.Model {
         private static readonly Random _random = new(DateTime.Now.Millisecond);
         private readonly List<GescandProduct> _scannedProducts = [];
 
-        public static readonly string SHOPNAME = "WARENHUIS OVERFLOW";
-        public static readonly string ADDRES = "Stapelplein 1, 9000 Gent";
-        public static readonly string TEL = "Tel: 09 234 56 78";
-        public static readonly string BTWNUMBER = "BTW: BE 0123.456.789";
+        public const string SHOPNAME = "WARENHUIS OVERFLOW";
+        public const string ADDRES = "Stapelplein 1, 9000 Gent";
+        public const string TEL = "Tel: 09 234 56 78";
+        public const string BTWNUMBER = "BTW: BE 0123.456.789";
 
         private readonly string _ticketCode = "";
         private readonly string _date = "";
@@ -29,13 +29,8 @@ namespace WinkelDomein.Model {
             init => _cashRef = value;
         }
 
-        public List<GescandProduct> Products => _scannedProducts;
-        public bool HasScannedProducts => _scannedProducts.Count != 0;
-        public int AmountOfProducts => _scannedProducts.Count;
-
         public decimal TotalPriceNoBtw {
             get {
-                if (_scannedProducts.Count == 0) return 0m;
                 decimal totalPrice = 0m;
                 foreach (var scannedProduct in _scannedProducts) {
                     totalPrice += scannedProduct.Quantity * scannedProduct.Product.Price;
@@ -45,7 +40,6 @@ namespace WinkelDomein.Model {
         }
         public decimal TotalBtw {
             get {
-                if (_scannedProducts.Count == 0) return 0m;
                 decimal totalPrice = 0m;
                 foreach (var scannedProduct in _scannedProducts) {
                     totalPrice += scannedProduct.Quantity * scannedProduct.Product.Price * (scannedProduct.Product.Btw / 100m);
@@ -54,6 +48,9 @@ namespace WinkelDomein.Model {
             }
         }
         public decimal TotalPrice => TotalPriceNoBtw + TotalBtw;
+        public List<GescandProduct> Products => _scannedProducts;
+        public bool HasScannedProducts => _scannedProducts.Count != 0;
+        public int AmountOfProducts => _scannedProducts.Count;
 
         public KassaTicket() {
             DateTime now = DateTime.Now;
@@ -97,11 +94,9 @@ namespace WinkelDomein.Model {
             DiminishProduct(gescandProduct.Product, amount);
         }
 
-        public override string ToString() {
-            return $"#{TicketCode} ({AmountOfProducts} producten)";
-        }
+        public override string ToString() => $"#{TicketCode} ({AmountOfProducts} producten)";
 
-        public string ToStringLayout(TicketSoort soort = TicketSoort.Normaal, BetaalDetails? betaalDetails = default,
+        public string ToStringLayout(TicketSoort soort = TicketSoort.Normaal, BetaalDetails? betaalDetails = null,
             int ticketWidth = 42, int paddingLeft = 2) {
             string p = new(' ', paddingLeft);
             StringBuilder stringLayout = new(
@@ -166,9 +161,5 @@ namespace WinkelDomein.Model {
                 return result.ToString();
             }
         }
-
-
-
-
     }
 }

@@ -1,7 +1,7 @@
 ﻿namespace WinkelDomein.Model {
     public class Product {
-        private readonly string _code;
-        private readonly string _name;
+        private readonly string _code = "";
+        private readonly string _name = "";
         private readonly decimal _price;
         private readonly int _btw;
 
@@ -33,7 +33,6 @@
                 _price = value;
             }
         }
-
         public int Btw {
             get => _btw;
             init {
@@ -42,9 +41,7 @@
             }
         }
 
-        public override string ToString() {
-            return $"{Name} ({Code})";
-        }
+        public override string ToString() => $"{Name} ({Code})";
     }
 }
 

@@ -13,9 +13,12 @@ namespace WinkelDomein.Model {
             Quantity = quantity;
         }
 
-        public Product Product { 
-            get => _product; 
-            init => _product = value; 
+        public Product Product {
+            get => _product;
+            init {
+                ArgumentNullException.ThrowIfNull(value);
+                _product = value;
+            }
         }
         public int Quantity { 
             get => _quantity; 
@@ -25,8 +28,6 @@ namespace WinkelDomein.Model {
             } 
         }
 
-        public override string ToString() {
-            return $"{Quantity}x {Product.Name} €{Product.Price} {Product.Btw}%";
-        }
+        public override string ToString() => $"{Quantity}x {Product.Name} €{Product.Price} {Product.Btw}%";
     }
 }

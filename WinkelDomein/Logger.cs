@@ -46,12 +46,12 @@ namespace WinkelDomein {
         }
 
         public static void LogPaidTicketCard(KassaTicket kassaTicket, BetaalDetails betaalDetails) {
-            string message = $"{Now} [KASSA] BETALING ticket {kassaTicket.TicketCode}: {betaalDetails.Bedrag} ({betaalDetails.Methode})";
+            string message = $"{Now} [KASSA] BETALING ticket {kassaTicket.TicketCode}: €{betaalDetails.Bedrag} ({betaalDetails.Methode})";
             File.AppendAllText(_logFilePath, message + Environment.NewLine);
         }
 
         public static void LogPaidTicketCash(KassaTicket kassaTicket) {
-            string message = $"{Now} [KASSA] BETALING ticket {kassaTicket.TicketCode}: {kassaTicket.TotalPrice} (Cash)";
+            string message = $"{Now} [KASSA] BETALING ticket {kassaTicket.TicketCode}: €{kassaTicket.TotalPrice} (Cash)";
             File.AppendAllText(_logFilePath, message + Environment.NewLine);
         }
 

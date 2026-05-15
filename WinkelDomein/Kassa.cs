@@ -8,8 +8,6 @@ namespace WinkelDomein {
         private List<Product> _possibleProducts = [];
         private List<KassaTicket> _tickets = [];
 
-        public List<Product> PossibleProducts { get => _possibleProducts; set => _possibleProducts = value; }
-
         public bool HasTickets {
             get => _tickets.Count != 0;
         }
@@ -53,8 +51,9 @@ namespace WinkelDomein {
         }
 
         public KassaTicket ParkKassaTicket(KassaTicket kassaTicket) {
+            KassaTicket newTicket = GenerateNewKassaTicket();
             Logger.LogParkTicket(kassaTicket);
-            return GenerateNewKassaTicket();
+            return newTicket;
         }
 
         public void RemoveTicket(KassaTicket ticket) {
@@ -65,8 +64,8 @@ namespace WinkelDomein {
         }
 
         public void FinishTicketCard(KassaTicket ticket, BetaalDetails betaalDetails) {
-            bool succes = _tickets.Remove(ticket);
-            if (!succes) throw new ArgumentException(message: "Ticket niet afegrond");
+            bool isRemoved = _tickets.Remove(ticket);
+            if (!isRemoved) throw new ArgumentException(message: "Ticket niet afegrond");
             Logger.LogPaidTicketCard(ticket, betaalDetails);
             Logger.SaveTicket(ticket, TicketSoort.Kaart, betaalDetails);
         }
@@ -89,7 +88,7 @@ namespace WinkelDomein {
                 KassaTicket ticket = ResumeTicketByIndex(TicketCount - 1);
                 return ticket;
             } else {
-                return default!;
+                return null!;
             }
         }
 

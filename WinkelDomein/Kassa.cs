@@ -1,4 +1,5 @@
-﻿using WinkelDomein.Interface;
+﻿using WinkelDomein.Enum;
+using WinkelDomein.Interface;
 using WinkelDomein.Model;
 
 namespace WinkelDomein {
@@ -56,25 +57,40 @@ namespace WinkelDomein {
             return GenerateNewKassaTicket();
         }
 
-        public void RemoveKassaTicket(KassaTicket ticket) {
+        public void RemoveTicket(KassaTicket ticket) {
             bool succes = _tickets.Remove(ticket);
             if (!succes) throw new ArgumentException(message: "Ticket niet verwijderd");
             Logger.LogCancelTicket(ticket);
+            Logger.SaveTicket(ticket);
         }
 
-        public KassaTicket GetTicketByIndex(int index) {
-            return _tickets[index];
+        public void FinishTicketCard(KassaTicket ticket, BetaalDetails betaalDetails) {
+            bool succes = _tickets.Remove(ticket);
+            if (!succes) throw new ArgumentException(message: "Ticket niet afegrond");
+            Logger.LogPaidTicketCard(ticket, betaalDetails);
+            Logger.SaveTicket(ticket, TicketSoort.Kaart, betaalDetails);
+        }
+
+        public void FinishTicketCash(KassaTicket ticket) {
+            bool succes = _tickets.Remove(ticket);
+            if (!succes) throw new ArgumentException(message: "Ticket niet afegrond");
+            Logger.LogPaidTicketCash(ticket);
+            Logger.SaveTicket(ticket, TicketSoort.Cash);
+        }
+
+        public KassaTicket ResumeTicketByIndex(int index) {
+            KassaTicket ticket = _tickets[index];
+            Logger.LogResumeTicket(ticket);
+            return ticket;
         }
 
         public KassaTicket GetLastTicket() {
-            if (HasTickets) return _tickets[^1];
-            else return default!;
-        }
-
-        public void FinishTicket(KassaTicket ticket) {
-            bool succes = _tickets.Remove(ticket);
-            if (!succes) throw new ArgumentException(message: "Ticket niet afegrond");
-            // Log ticket
+            if (HasTickets) {
+                KassaTicket ticket = ResumeTicketByIndex(TicketCount - 1);
+                return ticket;
+            } else {
+                return default!;
+            }
         }
 
         public Product? GetProductByCode(string code) {

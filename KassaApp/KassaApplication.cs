@@ -60,7 +60,8 @@ public class KassaApplication {
                         continue;
                     }
                     DisplayTicket(currentKassaTicket, TicketSoort.Kaart, result);
-                    _kassa.FinishTicket(currentKassaTicket);
+                    _kassa.FinishTicketCard(currentKassaTicket, result);
+                    currentKassaTicket = _kassa.GetLastTicket();
                     break;
 
                 // Betalen met cash
@@ -70,7 +71,7 @@ public class KassaApplication {
                         continue;
                     }
                     DisplayTicket(currentKassaTicket, TicketSoort.Cash);
-                    _kassa.FinishTicket(currentKassaTicket);
+                    _kassa.FinishTicketCash(currentKassaTicket);
                     currentKassaTicket = _kassa.GetLastTicket();
                     break;
 
@@ -90,11 +91,11 @@ public class KassaApplication {
                         WriteLineInColor("Verkeerde input", ConsoleColor.Red);
                         continue;
                     }
-                    currentKassaTicket = currentTickets[choice - 1];
+                    currentKassaTicket = _kassa.ResumeTicketByIndex(choice - 1);
                     break;
 
                 case "A":
-                    _kassa.RemoveKassaTicket(currentKassaTicket);
+                    _kassa.RemoveTicket(currentKassaTicket);
                     currentKassaTicket = _kassa.GetLastTicket();
                     break;
 
@@ -111,7 +112,6 @@ public class KassaApplication {
 
         WriteLine(ticket.ToStringLayout(soort, betaalDetails, ticketWidth, paddingLeft));
         if (soort == TicketSoort.Normaal) {
-            WriteLine();
             PrintUserInstructions();
         } else if (soort == TicketSoort.Cash) {
             WriteInColorLeftPadding("✓ Betaling ontvangen - €" + ticket.TotalPrice, ConsoleColor.Green, paddingLeft);

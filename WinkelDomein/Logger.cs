@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
+using WinkelDomein.Enum;
 using WinkelDomein.Model;
 
 namespace WinkelDomein {
@@ -22,8 +23,9 @@ namespace WinkelDomein {
             File.AppendAllText(_logFilePath, message + Environment.NewLine);
         }
 
-        public static void SaveTicket(KassaTicket kassaTicket) {
-            // Sla ticket op in folder
+        public static void SaveTicket(KassaTicket kassaTicket, TicketSoort soort = TicketSoort.Normaal, BetaalDetails betaalDetails = default) {
+            string fileName = Path.Combine(_savedTicketsFolderPath, $"kassaticket-{kassaTicket.TicketCode}.txt");
+            File.WriteAllText(fileName, kassaTicket.ToStringLayout(soort, betaalDetails));
             string message = $"{Now} [SYSTEEM] Ticket opgeslagen {kassaTicket.TicketCode}";
             File.AppendAllText(_logFilePath, message + Environment.NewLine);
         }
@@ -35,6 +37,21 @@ namespace WinkelDomein {
 
         public static void LogParkTicket(KassaTicket kassaTicket) {
             string message = $"{Now} [KASSA] PARKEREN ticket {kassaTicket.TicketCode}";
+            File.AppendAllText(_logFilePath, message + Environment.NewLine);
+        }
+
+        public static void LogResumeTicket(KassaTicket kassaTicket) {
+            string message = $"{Now} [KASSA] HERVATTEN ticket {kassaTicket.TicketCode}";
+            File.AppendAllText(_logFilePath, message + Environment.NewLine);
+        }
+
+        public static void LogPaidTicketCard(KassaTicket kassaTicket, BetaalDetails betaalDetails) {
+            string message = $"{Now} [KASSA] BETALING ticket {kassaTicket.TicketCode}: {betaalDetails.Bedrag} ({betaalDetails.Methode})";
+            File.AppendAllText(_logFilePath, message + Environment.NewLine);
+        }
+
+        public static void LogPaidTicketCash(KassaTicket kassaTicket) {
+            string message = $"{Now} [KASSA] BETALING ticket {kassaTicket.TicketCode}: {kassaTicket.TotalPrice} (Cash)";
             File.AppendAllText(_logFilePath, message + Environment.NewLine);
         }
 

@@ -7,6 +7,7 @@ using WinkelDomein.Model;
 namespace WinkelDomein {
     public static class Logger {
         private static readonly string _logFilePath = @"Log.txt";
+        private static readonly string _savedTicketsFolderPath = @"SavedTickets";
 
         private static string Now => $"[{DateTime.Now:yyyy-MM-dd HH:mm:ff}]";
 
@@ -18,6 +19,12 @@ namespace WinkelDomein {
 
         public static void SystemLog(string text) {
             string message = $"{Now} [SYSTEEM] {text}";
+            File.AppendAllText(_logFilePath, message + Environment.NewLine);
+        }
+
+        public static void SaveTicket(KassaTicket kassaTicket) {
+            // Sla ticket op in folder
+            string message = $"{Now} [SYSTEEM] Ticket opgeslagen {kassaTicket.TicketCode}";
             File.AppendAllText(_logFilePath, message + Environment.NewLine);
         }
 

@@ -18,4 +18,8 @@
     <ProjectReference Include="..\WinkelDomein\WinkelDomein.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="bin\Debug\net10.0\SavedTickets\" />
+  </ItemGroup>
+
 </Project>

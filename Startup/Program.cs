@@ -11,7 +11,7 @@ namespace Startup {
             Console.OutputEncoding = Encoding.UTF8;
             Logger.StartLogger();
 
-            IBetaalTerminal snelleTerminal = new MockBetaalTerminal(50, 200);
+            IBetaalTerminal snelleTerminal = new MockBetaalTerminal(500, 2000);
             Kassa kassa = new(snelleTerminal);
             KassaApplication _ = new(kassa);
 

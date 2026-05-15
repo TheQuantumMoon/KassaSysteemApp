@@ -102,7 +102,6 @@ public class KassaApplication {
                     WriteLineInColor("  Input niet herkend", ConsoleColor.Red);
                     break;
             }
-
         }
     }
 
@@ -110,43 +109,19 @@ public class KassaApplication {
         int ticketWidth = 42;
         int paddingLeft = 2;
 
-        WriteLine();
-        PrintThickLine(ticketWidth);
-        PrintTicketHeader(ticketWidth);
-        PrintThickLine(ticketWidth);
-        WriteLineLeftPadding($"Ticket: {ticket.TicketCode}", paddingLeft);
-        WriteLineLeftPadding($"Datum: {ticket.Date}", paddingLeft);
-        PrintThinLine(ticketWidth);
-        PrintScannedProducts(ticket, ticketWidth, paddingLeft);
-        PrintThickLine(ticketWidth);
+        WriteLine(ticket.ToStringLayout(soort, betaalDetails, ticketWidth, paddingLeft));
         if (soort == TicketSoort.Normaal) {
             WriteLine();
             PrintUserInstructions();
         } else if (soort == TicketSoort.Cash) {
-            WriteLineLeftPadding("Contante betaling", paddingLeft);
-            WriteLineLeftPadding("Bedrag:\t\t€   " + ticket.TotalPrice, paddingLeft);
-            WriteLineLeftPadding("Ref: " + ticket.CashRef, paddingLeft);
-            PrintThickLine(ticketWidth);
-            WriteLine();
             WriteInColorLeftPadding("✓ Betaling ontvangen - €" + ticket.TotalPrice, ConsoleColor.Green, paddingLeft);
             WriteLine();
         } else if (soort == TicketSoort.Kaart) {
-            WriteLineLeftPadding(betaalDetails!.KaartVariant, paddingLeft);
-            WriteLineLeftPadding(betaalDetails!.GemaskerdKaartnummer, paddingLeft);
-            WriteLineLeftPadding(betaalDetails!.Methode, paddingLeft);
-            WriteLineLeftPadding("Bedrag:\t\t€   " + betaalDetails!.Bedrag, paddingLeft);
-            WriteLineLeftPadding("Ref: " + betaalDetails!.TransactieReferentie, paddingLeft);
-            PrintThickLine(ticketWidth);
-            WriteLine();
-            WriteInColorLeftPadding("✓ Betaling ontvangen - €" + betaalDetails.Bedrag, ConsoleColor.Green, paddingLeft);
+            WriteInColorLeftPadding("✓ Betaling ontvangen - €" + betaalDetails!.Bedrag, ConsoleColor.Green, paddingLeft);
             WriteLine();
         }
     }
 
-    public static void WriteLineCenter(string text, int totalWidth) {
-        int calculatedPadding = (text.Length + totalWidth) / 2;
-        WriteLine(text.PadLeft(calculatedPadding));
-    }
     public static void WriteLineLeftPadding(string text, int padding) {
         int calculatedPadding = text.Length + padding;
         WriteLine(text.PadLeft(calculatedPadding));
@@ -166,33 +141,7 @@ public class KassaApplication {
         WriteLine(text);
         ResetColor();
     }
-    public static void PrintThinLine(int length) {
-        string thinLine = new('-', length);
-        WriteLine(thinLine);
-    }
-    public static void PrintThickLine(int length) {
-        string thickLine = new('=', length);
-        WriteLine(thickLine);
-    }
-    public static void PrintTicketHeader(int ticketWidth) {
-        WriteLineCenter(KassaTicket.SHOPNAME, ticketWidth);
-        WriteLineCenter(KassaTicket.ADDRES, ticketWidth);
-        WriteLineCenter(KassaTicket.TEL, ticketWidth);
-        WriteLineCenter(KassaTicket.BTWNUMBER, ticketWidth);
-    }
-    public static void PrintScannedProducts(KassaTicket ticket, int ticketWidth, int paddingLeft) {
-        List<GescandProduct> products = ticket.Products;
-        if (products.Count != 0) {
-            foreach (var product in products) WriteLineLeftPadding(product.ToString(), paddingLeft);
-            PrintThinLine(ticketWidth);
-            WriteLineLeftPadding("Subtotaal excl. BTW:\t€   " + ticket.TotalPriceNoBtw, paddingLeft);
-            WriteLineLeftPadding("--> BTW:\t\t€   " + ticket.TotalBtw, paddingLeft + 2);
-            PrintThinLine(ticketWidth);
-            WriteLineLeftPadding("TOTAAL:\t\t€   " + ticket.TotalPrice, paddingLeft);
-        } else {
-            WriteLineLeftPadding("(leeg)", paddingLeft);
-        }
-    }
+
     public void PrintUserInstructions() {
         int amountOfTickets = _kassa.TicketCount;
         if (amountOfTickets > 1) WriteLineInColor($"[{amountOfTickets - 1} geparkeerd]", ConsoleColor.Cyan);

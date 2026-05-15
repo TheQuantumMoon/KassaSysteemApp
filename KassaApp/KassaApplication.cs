@@ -67,7 +67,7 @@ public class KassaApplication {
                 // Betalen met cash
                 case "C":
                     if (!currentKassaTicket.HasScannedProducts) {
-                        WriteInColor("  Er zijn nog geen ingescande items", ConsoleColor.Red);
+                        WriteInColor("Er zijn nog geen ingescande items", ConsoleColor.Red);
                         continue;
                     }
                     DisplayTicket(currentKassaTicket, TicketSoort.Cash);
@@ -145,13 +145,14 @@ public class KassaApplication {
         ResetColor();
     }
 
-    public void PrintUserInstructions() {
+    public void PrintUserInstructions(int padding = 2) {
+        string p = new(' ', padding);
         int amountOfTickets = _kassa.TicketCount;
-        if (amountOfTickets > 1) WriteLineInColor($"[{amountOfTickets - 1} geparkeerd]", ConsoleColor.Cyan);
-        WriteLineInColor("<scan barcode> of [barcode]<Enter> | [aantal extra]<Enter>\n" +
-            "[D]<Enter> = verwijderen | [Z]<Enter> = undo-laatste\n" +
-            "[K]<Enter> = betalen met Kaart | [C]<Enter> = betaald met Cash\n" +
-            "[P]<Enter> = parkeren | [H]<Enter> = hervatten | [A]<Enter> = afbreken", ConsoleColor.DarkGray);
+        if (amountOfTickets > 1) WriteLineInColor($"{p}[{amountOfTickets - 1} geparkeerd]", ConsoleColor.Cyan);
+        WriteLineInColor("  <scan barcode> of [barcode]<Enter> | [aantal extra]<Enter>\n" +
+            $"{p}[D]<Enter> = verwijderen | [Z]<Enter> = undo-laatste\n" +
+            $"{p}[K]<Enter> = betalen met Kaart | [C]<Enter> = betaald met Cash\n" +
+            $"{p}[P]<Enter> = parkeren | [H]<Enter> = hervatten | [A]<Enter> = afbreken", ConsoleColor.DarkGray);
     }
     public static void PrintPaymentByCardPrompt(KassaTicket kassaTicket) {
         string priceInfo = $"Bedrag: €   {kassaTicket.TotalPrice}";

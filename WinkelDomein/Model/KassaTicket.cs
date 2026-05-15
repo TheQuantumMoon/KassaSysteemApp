@@ -16,6 +16,10 @@ namespace WinkelDomein.Model {
         private readonly string _date = "";
         private readonly string _cashRef = "";
 
+        // Ik ben op de hoogte dat er telkens een nieuw ticketnummer moet worden gegenereerd per aanpassing
+        // van het ticket, maar ik heb ervoor gekozen om dit niet te doen, omdat ik dit niet logisch vind
+        // in het kader van de log-functionaliteit. Dit zorgt er voor dat elke vermelding van de ticketcode
+        // in de log, buiten de laatste, nutteloos is
         public string TicketCode {
             get => _ticketCode;
             init => _ticketCode = value;
@@ -48,7 +52,7 @@ namespace WinkelDomein.Model {
             }
         }
         public decimal TotalPrice => TotalPriceNoBtw + TotalBtw;
-        public List<GescandProduct> Products => _scannedProducts;
+        public List<GescandProduct> ScannedProducts => _scannedProducts;
         public bool HasScannedProducts => _scannedProducts.Count != 0;
         public int AmountOfProducts => _scannedProducts.Count;
 
@@ -76,7 +80,7 @@ namespace WinkelDomein.Model {
             if (foundGescandProduct == default) {
                 throw new ArgumentException(message: "Het kassaticket bevat dit product niet");
             } else if (foundGescandProduct.Quantity <= amount) {
-                Products.Remove(foundGescandProduct);
+                ScannedProducts.Remove(foundGescandProduct);
                 Logger.LogRemoveProduct(this, product, foundGescandProduct.Quantity);
             } else {
                 foundGescandProduct.Quantity -= amount;
@@ -84,13 +88,13 @@ namespace WinkelDomein.Model {
             }
         }
         public void IncreaseLastProduct(int amount = 1) {
-            if (Products.Count == 0) throw new ArgumentException(message: "Er zijn nog geen producten ingescand");
-            GescandProduct gescandProduct = Products[^1];
+            if (ScannedProducts.Count == 0) throw new ArgumentException(message: "Er zijn nog geen producten ingescand");
+            GescandProduct gescandProduct = ScannedProducts[^1];
             IncreaseProduct(gescandProduct.Product, amount);
         }
         public void DiminishLastProduct(int amount = 1) {
-            if (Products.Count == 0) throw new ArgumentException(message: "Er zijn nog geen producten ingescand");
-            GescandProduct gescandProduct = Products[^1];
+            if (ScannedProducts.Count == 0) throw new ArgumentException(message: "Er zijn nog geen producten ingescand");
+            GescandProduct gescandProduct = ScannedProducts[^1];
             DiminishProduct(gescandProduct.Product, amount);
         }
 
@@ -105,7 +109,7 @@ namespace WinkelDomein.Model {
                 $"{StringTicketHeader(ticketWidth)}" +
                 $"{StringThickLine(ticketWidth)}\n" +
                 $"{p}Ticket: {TicketCode}\n" +
-                $"{p}Datum: {Date}\n" +
+                $"{p}Datum:  {Date}\n" +
                 $"{StringThinLine(ticketWidth)}\n" +
                 $"{StringScannedProducts(ticketWidth, p)}" +
                 $"{StringThickLine(ticketWidth)}\n");
@@ -144,17 +148,16 @@ namespace WinkelDomein.Model {
                 $"{CenterString(BTWNUMBER, ticketWidth)}\n";
                 return result;
             }
-            string StringScannedProducts(int ticketWidth, string p) {
+            string StringScannedProducts(int ticketWidth, string p){
                 StringBuilder result = new();
                 if (HasScannedProducts) {
-                    foreach (var product in Products) result.AppendLine($"{p}{product}");
+                    foreach (var product in ScannedProducts) result.AppendLine($"{p}  {product}");
                     result.Append(
                         $"{StringThinLine(ticketWidth)}\n" +
                         $"{p}Subtotaal excl. BTW:\t€   {TotalPriceNoBtw}\n" +
                         $"{p}  --> BTW:\t\t€   {TotalBtw}\n" +
                         $"{StringThinLine(ticketWidth)}\n" +
-                        $"{p}TOTAAL:\t\t€   {TotalPrice}\n"
-                        );
+                        $"{p}TOTAAL:\t\t€   {TotalPrice}\n");
                 } else {
                     result.Append($"{p}(leeg)\n");
                 }

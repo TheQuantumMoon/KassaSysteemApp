@@ -7,7 +7,17 @@ namespace WinkelDomein {
         private readonly IBetaalTerminal _betaalTerminal;
         private List<Product> _possibleProducts = [];
         private List<KassaTicket> _tickets = [];
+        private KassaTicket _currentTicket;
 
+        public KassaTicket CurrentTicket {
+            get {
+                if (!HasTickets) GenerateNewKassaTicket();
+                if (!_tickets.Contains(_currentTicket)) CurrentTicket = GetLastTicket();
+                return _currentTicket;
+            }
+
+            set => _currentTicket = value;
+        }
         public bool HasTickets {
             get => _tickets.Count != 0;
         }
@@ -15,7 +25,6 @@ namespace WinkelDomein {
             get => _tickets.Count;
         }
         public int PossibleProductsCount => _possibleProducts.Count;
-        public List<KassaTicket> Tickets { get => _tickets; set => _tickets = value; }
 
         public Kassa(IBetaalTerminal betaalTerminal) {
             _betaalTerminal = betaalTerminal;
@@ -43,53 +52,76 @@ namespace WinkelDomein {
             }
         }
 
-        public KassaTicket GenerateNewKassaTicket() {
+        public void GenerateNewKassaTicket() {
             KassaTicket newTicket = new();
             _tickets.Add(newTicket);
+            CurrentTicket = newTicket;
             Logger.LogNewTicket(newTicket);
-            return newTicket;
         }
 
-        public KassaTicket ParkKassaTicket(KassaTicket kassaTicket) {
-            KassaTicket newTicket = GenerateNewKassaTicket();
-            Logger.LogParkTicket(kassaTicket);
-            return newTicket;
+        public void IncreaseProduct(Product? product, int amount = 1, bool actionHistory = true) {
+            CurrentTicket.IncreaseProduct(product, amount, actionHistory);
+        }
+        public void IncreaseLastProduct(int amount = 1, bool actionHistory = true) {
+            CurrentTicket.IncreaseLastProduct(amount, actionHistory);
+        }
+        public void DiminishProduct(Product? product, int amount = 1, bool actionHistory = true) {
+            CurrentTicket.DiminishProduct(product, amount, actionHistory);
+        }
+        public void DiminishLastProduct(int amount = 1, bool actionHistory = true) {
+            CurrentTicket.DiminishLastProduct(amount, actionHistory);
+        }
+        public void UndoLastProductAmountChange() {
+            CurrentTicket.UndoLastProductAmountChange();
         }
 
-        public void RemoveTicket(KassaTicket ticket) {
+        public void ParkKassaTicket() {
+            KassaTicket ticket = CurrentTicket;
+            GenerateNewKassaTicket();
+            Logger.LogParkTicket(ticket);
+        }
+
+        public void RemoveTicket() {
+            KassaTicket ticket = CurrentTicket;
             bool succes = _tickets.Remove(ticket);
             if (!succes) throw new ArgumentException(message: "Ticket niet verwijderd");
             Logger.LogCancelTicket(ticket);
             Logger.SaveTicket(ticket);
         }
 
-        public void FinishTicketCard(KassaTicket ticket, BetaalDetails betaalDetails) {
+        public void FinishTicketCard(BetaalDetails betaalDetails) {
+            KassaTicket ticket = CurrentTicket;
             bool isRemoved = _tickets.Remove(ticket);
             if (!isRemoved) throw new ArgumentException(message: "Ticket niet afegrond");
             Logger.LogPaidTicketCard(ticket, betaalDetails);
             Logger.SaveTicket(ticket, TicketSoort.Kaart, betaalDetails);
         }
 
-        public void FinishTicketCash(KassaTicket ticket) {
+        public void FinishTicketCash() {
+            KassaTicket ticket = CurrentTicket;
             bool succes = _tickets.Remove(ticket);
             if (!succes) throw new ArgumentException(message: "Ticket niet afegrond");
             Logger.LogPaidTicketCash(ticket);
             Logger.SaveTicket(ticket, TicketSoort.Cash);
         }
 
-        public KassaTicket ResumeTicketByIndex(int index) {
+        public void ResumeTicketByIndex(int index) {
             KassaTicket ticket = _tickets[index];
+            CurrentTicket = ticket;
             Logger.LogResumeTicket(ticket);
+        }
+
+        private KassaTicket GetLastTicket() {
+            KassaTicket ticket = _tickets[^1];
             return ticket;
         }
 
-        public KassaTicket GetLastTicket() {
-            if (HasTickets) {
-                KassaTicket ticket = ResumeTicketByIndex(TicketCount - 1);
-                return ticket;
-            } else {
-                return null!;
+        public List<string> GetTicketListString() {
+            List<string> output = [];
+            foreach (var ticket in _tickets) {
+                output.Add(ticket.ToString());
             }
+            return output;
         }
 
         public Product? GetProductByCode(string code) {
@@ -101,8 +133,8 @@ namespace WinkelDomein {
             }
         }
 
-        public BetaalDetails? VerzoekBetaling(decimal bedrag, string boodschap) {
-            return _betaalTerminal.VerzoekBetaling(bedrag, boodschap);
+        public BetaalDetails? VerzoekBetaling(string boodschap) {
+            return _betaalTerminal.VerzoekBetaling(CurrentTicket.TotalPrice, boodschap);
         }
     }
 }

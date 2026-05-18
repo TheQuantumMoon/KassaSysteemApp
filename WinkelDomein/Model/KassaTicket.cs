@@ -98,15 +98,15 @@ namespace WinkelDomein.Model {
                 Logger.LogRemoveProduct(this, product, amount);
             }
         }
-        public void IncreaseLastProduct(int amount = 1) {
+        public void IncreaseLastProduct(int amount = 1, bool actionHistory = true) {
             if (ScannedProducts.Count == 0) throw new ArgumentException(message: "Er zijn nog geen producten ingescand");
             GescandProduct gescandProduct = ScannedProducts[^1];
-            IncreaseProduct(gescandProduct.Product, amount);
+            IncreaseProduct(gescandProduct.Product, amount, actionHistory);
         }
-        public void DiminishLastProduct(int amount = 1) {
+        public void DiminishLastProduct(int amount = 1, bool actionHistory = true) {
             if (ScannedProducts.Count == 0) throw new ArgumentException(message: "Er zijn nog geen producten ingescand");
             GescandProduct gescandProduct = ScannedProducts[^1];
-            DiminishProduct(gescandProduct.Product, amount);
+            DiminishProduct(gescandProduct.Product, amount, actionHistory);
         }
 
         public void UndoLastProductAmountChange() {

@@ -47,9 +47,9 @@ public class KassaApplication {
                     try { currentKassaTicket.DiminishProduct(product); } catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     break;
 
-                // Verwijder laast toegevoegde product
+                // Undo de laatste scan, toevoeging van aantal of verwijdering van een product
                 case "Z":
-                    try { currentKassaTicket.DiminishLastProduct(); } catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
+                    try { currentKassaTicket.UndoLastProductAmountChange(); } catch (Exception ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     break;
 
                 // Betalen met kaart

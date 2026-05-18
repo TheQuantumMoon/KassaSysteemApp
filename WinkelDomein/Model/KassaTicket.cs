@@ -6,6 +6,7 @@ namespace WinkelDomein.Model {
 
         private static readonly Random _random = new(DateTime.Now.Millisecond);
         private readonly List<GescandProduct> _scannedProducts = [];
+        private readonly List<KeyValuePair<Product, int>> _actionHistory = [];
 
         public const string SHOPNAME = "WARENHUIS OVERFLOW";
         public const string ADDRES = "Stapelplein 1, 9000 Gent";
@@ -63,27 +64,37 @@ namespace WinkelDomein.Model {
             CashRef = $"CASH-{now:yyyyMMdd}-{_random.Next(100000, 999999)}";
         }
 
-        public void IncreaseProduct(Product? product, int amount = 1) {
+        /* Voegt een nieuw product toe aan het ticket moest het nog niet in ScannedProducts zitten,
+        of verhoogt het aantal van het product in ScannedProducts dat overeenkomt met het gegeven product, met het opgegeven aantal */
+        public void IncreaseProduct(Product? product, int amount = 1, bool actionHistory = true) {
+            if (amount == 0) return;
             if (product == null) throw new ArgumentException(message: "Dit product bestaat niet");
             GescandProduct foundGescandProduct = _scannedProducts.Find((gescandProduct) => gescandProduct.Product == product)!;
             if (foundGescandProduct == default) {
                 GescandProduct newGescandProduct = new(product, amount);
                 _scannedProducts.Add(newGescandProduct);
             } else {
-                foundGescandProduct.Quantity += amount;
+                foundGescandProduct.Quantity += amount;;
             }
+            if (actionHistory) _actionHistory.Add(new(product, amount));
             Logger.LogScanProduct(this, product, amount);
         }
-        public void DiminishProduct(Product? product, int amount = 1) {
+        /* Verminderd het aantal van het product in ScannedProducts dat overeenkomt met het opgegeven product met het 
+         * 
+         */
+        public void DiminishProduct(Product? product, int amount = 1, bool actionHistory = true) {
+            if (amount == 0) return;
             if (product == null) throw new ArgumentException(message: "Dit product bestaat niet");
             GescandProduct foundGescandProduct = _scannedProducts.Find((gescandProduct) => gescandProduct.Product == product)!;
             if (foundGescandProduct == default) {
                 throw new ArgumentException(message: "Het kassaticket bevat dit product niet");
             } else if (foundGescandProduct.Quantity <= amount) {
                 ScannedProducts.Remove(foundGescandProduct);
+                if (actionHistory) _actionHistory.Add(new(product, foundGescandProduct.Quantity * -1));
                 Logger.LogRemoveProduct(this, product, foundGescandProduct.Quantity);
             } else {
                 foundGescandProduct.Quantity -= amount;
+                if (actionHistory) _actionHistory.Add(new(product, amount * -1));
                 Logger.LogRemoveProduct(this, product, amount);
             }
         }
@@ -96,6 +107,26 @@ namespace WinkelDomein.Model {
             if (ScannedProducts.Count == 0) throw new ArgumentException(message: "Er zijn nog geen producten ingescand");
             GescandProduct gescandProduct = ScannedProducts[^1];
             DiminishProduct(gescandProduct.Product, amount);
+        }
+
+        public void UndoLastProductAmountChange() {
+            if (_actionHistory.Count == 0) throw new Exception(message: "Geen actiegeschiedenis beschikbaar");
+            KeyValuePair<Product, int> lastAction = _actionHistory[^1];
+            Product product = lastAction.Key;
+            int amount = lastAction.Value;
+
+            if (amount > 0) { // verwijder weer te toegevoegde zaken
+                Logger.LogUndo(this);
+                DiminishProduct(product, amount, actionHistory: false);
+            } else if (amount < 0) { // voeg te verwijderde zaken weer toe
+                Logger.LogUndo(this);
+                int adjustedAmount = -amount;
+                IncreaseProduct(product, adjustedAmount, actionHistory: false);
+            } else {
+                throw new Exception(message: "Actiegeschiedenis kan geen 0 bevatten");
+            }
+
+            _actionHistory.RemoveAt(_actionHistory.Count - 1);
         }
 
         public override string ToString() => $"#{TicketCode} ({AmountOfProducts} producten)";

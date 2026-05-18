@@ -19,7 +19,7 @@ namespace WinkelDomein {
         // Voor het loggen van algemene variabele systeemboodschappen
         public static void SystemLog(string text) {
             string message = $"{Now} {SYSTEMTAG} {text}";
-            File.AppendAllText(LOGFILEPATH, message + Environment.NewLine);
+            AddLog(message);
         }
 
         // Voor het wegschrijven van kassatickets (stringlayout) naar apparte tekstfiles op de opgegeven savedticketspath
@@ -27,54 +27,65 @@ namespace WinkelDomein {
             string fileName = Path.Combine(SAVEDTICKETSPATH, $"kassaticket-{kassaTicket.TicketCode}.txt");
             File.WriteAllText(fileName, kassaTicket.ToStringLayout(soort, betaalDetails));
             string message = $"{Now} {SYSTEMTAG} Ticket opgeslagen {kassaTicket.TicketCode}";
-            File.AppendAllText(LOGFILEPATH, message + Environment.NewLine);
+            AddLog(message);
         }
 
         // Voor het loggen van de creatie van een nieuw kassaticket
         public static void LogNewTicket(KassaTicket kassaTicket) {
             string message = $"{Now} {REGISTERTAG} NIEUW TICKET {kassaTicket.TicketCode}";
-            File.AppendAllText(LOGFILEPATH, message + Environment.NewLine);
+            AddLog(message);
         }
 
         // Voor het loggen van een geparkeerd kassaticket
         public static void LogParkTicket(KassaTicket kassaTicket) {
             string message = $"{Now} {REGISTERTAG} PARKEREN ticket {kassaTicket.TicketCode}";
-            File.AppendAllText(LOGFILEPATH, message + Environment.NewLine);
+            AddLog(message);
         }
 
         // Voor het loggen van een geparkeerd kassaticket dat hervat wordt
         public static void LogResumeTicket(KassaTicket kassaTicket) {
             string message = $"{Now} {REGISTERTAG} HERVATTEN ticket {kassaTicket.TicketCode}";
-            File.AppendAllText(LOGFILEPATH, message + Environment.NewLine);
+            AddLog(message);
         }
 
         // Voor het loggen van een kassaticket dat met de kaart is betaald
         public static void LogPaidTicketCard(KassaTicket kassaTicket, BetaalDetails betaalDetails) {
             string message = $"{Now} {REGISTERTAG} BETALING ticket {kassaTicket.TicketCode}: €{betaalDetails.Bedrag} ({betaalDetails.Methode})";
-            File.AppendAllText(LOGFILEPATH, message + Environment.NewLine);
+            AddLog(message);
         }
 
         // Voor het loggen van een kassaticket dat met cash is betaald
         public static void LogPaidTicketCash(KassaTicket kassaTicket) {
             string message = $"{Now} {REGISTERTAG} BETALING ticket {kassaTicket.TicketCode}: €{kassaTicket.TotalPrice} (Cash)";
-            File.AppendAllText(LOGFILEPATH, message + Environment.NewLine);
+            AddLog(message);
         }
 
         // Voor het loggen van een gecanceld kassaticket
         public static void LogCancelTicket(KassaTicket kassaTicket) {
             string message = $"{Now} {REGISTERTAG} ANNULERING ticket {kassaTicket.TicketCode}";
-            File.AppendAllText(LOGFILEPATH, message + Environment.NewLine);
+            AddLog(message);
         }
 
         // Voor het loggen van een product dat gescand wordt en wordt toegevoegd aan een kassaticket
         public static void LogScanProduct(KassaTicket kassaTicket, Product product, int amount) {
             string message = $"{Now} {REGISTERTAG} SCAN {amount}x {product} op ticket {kassaTicket.TicketCode}";
-            File.AppendAllText(LOGFILEPATH, message + Environment.NewLine);
+            AddLog(message);
         }
 
         // Voor het loggen van een product en aantal dat wordt verwijderd van een kassaticket
         public static void LogRemoveProduct(KassaTicket kassaTicket, Product product, int amount) {
             string message = $"{Now} {REGISTERTAG} VERWIJDER {amount}x {product} op ticket {kassaTicket.TicketCode}";
+            AddLog(message);
+        }
+
+        // Voor het loggen van een undo action
+        public static void LogUndo(KassaTicket kassaTicket) {
+            string message = $"{Now} {REGISTERTAG} UNDO laatste actie op ticket {kassaTicket.TicketCode}";
+            AddLog(message);
+        }
+
+        // Schrijf een string weg naar de logfile
+        private static void AddLog(string message) {
             File.AppendAllText(LOGFILEPATH, message + Environment.NewLine);
         }
     }

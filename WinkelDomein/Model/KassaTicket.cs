@@ -16,10 +16,10 @@ namespace WinkelDomein.Model {
         private readonly string _date = "";
         private readonly string _cashRef = "";
 
-        // Ik ben op de hoogte dat er telkens een nieuw ticketnummer moet worden gegenereerd per aanpassing
-        // van het ticket, maar ik heb ervoor gekozen om dit niet te doen, omdat ik dit niet logisch vind
-        // in het kader van de log-functionaliteit. Dit zorgt er voor dat elke vermelding van de ticketcode
-        // in de log, buiten de laatste, nutteloos is
+        /*  Ik ben op de hoogte dat er telkens een nieuw ticketnummer moet worden gegenereerd per aanpassing
+            van het ticket, maar ik heb ervoor gekozen om dit niet te doen, omdat ik dit niet logisch vind
+            in het kader van de log-functionaliteit. Dit zorgt er voor dat elke vermelding van de ticketcode
+            in de log, buiten de laatste, nutteloos is */
         public string TicketCode {
             get => _ticketCode;
             init => _ticketCode = value;

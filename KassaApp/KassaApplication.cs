@@ -10,10 +10,11 @@ public class KassaApplication {
 
     public KassaApplication(Kassa kassa) {
         _kassa = kassa;
-        StartApplication();
+        Start();
     }
 
-    public void StartApplication() {
+    // Start de applicatie
+    public void Start() {
         KassaTicket currentKassaTicket = _kassa.GenerateNewKassaTicket();
         while (true) {
             if (!_kassa.HasTickets) currentKassaTicket = _kassa.GenerateNewKassaTicket();
@@ -109,6 +110,7 @@ public class KassaApplication {
         }
     }
 
+    // Print een stringlayout van een kassaticket op de console. Aan de hand van de ticketsoort en de betaaldetails wordt er extra stuk toegevoegd met betaalinformatie
     public void DisplayTicket(KassaTicket ticket, TicketSoort soort = TicketSoort.Normaal, BetaalDetails? betaalDetails = null) {
         int ticketWidth = 42;
         int paddingLeft = 2;
@@ -125,26 +127,31 @@ public class KassaApplication {
         }
     }
 
+    // Print een string op de console met aan de linkerkant een megegeven aantal spaties
     public static void WriteLineLeftPadding(string text, int padding) {
         int calculatedPadding = text.Length + padding;
         WriteLine(text.PadLeft(calculatedPadding));
     }
+    // Print een string op de console met als forgroundcolor een opgegeven consolecolor
     public static void WriteInColor(string text, ConsoleColor color) {
         ForegroundColor = color;
         Write(text);
         ResetColor();
     }
+    // Combineert de methode WriteLineLeftPadding en WriteInColor
     public static void WriteInColorLeftPadding(string text, ConsoleColor color, int padding) {
         ForegroundColor = color;
         WriteLineLeftPadding(text, padding);
         ResetColor();
     }
+    // Print een string en een enter op de console als forgroundcolor een opgegeven consolecolor
     public static void WriteLineInColor(string text, ConsoleColor color) {
         ForegroundColor = color;
         WriteLine(text);
         ResetColor();
     }
 
+    // Print een blok tekst op de console die de gebruiker uitlegt welke inputs hij kan geven
     public void PrintUserInstructions(int padding = 2) {
         string p = new(' ', padding);
         int amountOfTickets = _kassa.TicketCount;
@@ -154,6 +161,7 @@ public class KassaApplication {
             $"{p}[K]<Enter> = betalen met Kaart | [C]<Enter> = betaald met Cash\n" +
             $"{p}[P]<Enter> = parkeren | [H]<Enter> = hervatten | [A]<Enter> = afbreken", ConsoleColor.DarkGray);
     }
+    // Print een blok tekst die de betaalpromt voor kaart moet voorstellen
     public static void PrintPaymentByCardPrompt(KassaTicket kassaTicket) {
         string priceInfo = $"Bedrag: €   {kassaTicket.TotalPrice}";
         WriteLine("  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓");
@@ -164,6 +172,7 @@ public class KassaApplication {
 
     }
 
+    // Een gestylde wrapper voor Console.ReadLine met input karakter en gekleurde input
     public static string AskInput() {
         ForegroundColor = ConsoleColor.Yellow;
         string input = ReadLine()!;

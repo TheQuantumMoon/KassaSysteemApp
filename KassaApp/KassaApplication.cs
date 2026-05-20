@@ -20,11 +20,13 @@ public class KassaApplication {
             Write("> ");
             string input = AskInput().Trim().ToUpper();
 
-            // Check of de input een productcode is, zoja, voeg het product toe aan het ticket
-            Product? product = _kassa.GetProductByCode(input);
-            if (product != null) {
-                _kassa.IncreaseProduct(product);
-                continue;
+            // Check of de input een geldig EAN13 code is en of het een productcode is, zoja, voeg het product toe aan het ticket
+            if (Kassa.IsEan13(input)) {
+                Product? product = _kassa.GetProductByCode(input);
+                if (product != null) {
+                    _kassa.IncreaseProduct(product);
+                    continue;
+                }
             }
 
             // Check of de input een int is, zoja pas het aantal van het laast ingegeven product aan
@@ -40,7 +42,7 @@ public class KassaApplication {
                 case "D":
                     Write("Barcode: ");
                     input = AskInput().Trim();
-                    product = _kassa.GetProductByCode(input);
+                    Product? product = _kassa.GetProductByCode(input);
                     try { _kassa.DiminishProduct(product); } catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     break;
 

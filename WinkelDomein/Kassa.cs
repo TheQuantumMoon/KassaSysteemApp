@@ -49,6 +49,7 @@ namespace WinkelDomein {
             foreach (var line in rawProducts) {
                 string[] productInfo = line.Split(';');
                 string code = productInfo[0];
+                if (!IsEan13(code)) throw new Exception(message: "Barcode is niet conform met de EAN13-standaard");
                 string name = productInfo[1];
                 decimal price = decimal.Parse(productInfo[2]);
                 int btw = int.Parse(productInfo[3]);
@@ -155,6 +156,24 @@ namespace WinkelDomein {
             KassaTicket ticket = _tickets[^1];
             RemoveStoredTicket(ticket);
             return ticket;
+        }
+
+        // Checkt of de ingegeven string een valide EAN13 barcode is
+        public static bool IsEan13(string barcode) {
+            if (string.IsNullOrWhiteSpace(barcode) || barcode.Length != 13 || !barcode.All(char.IsDigit)) return false;
+            int[] numbers = [.. barcode.Select(x => x - '0')];
+
+            int sum = 0;
+            for (int i = 0; i < 12; i++) {
+                int digit = numbers[i];
+                if (i % 2 == 0) sum += digit * 1;
+                else sum += digit * 3;
+            }
+            int remainder = sum % 10;
+            int calculatedCheckDigit = (remainder == 0) ? 0 : 10 - remainder;
+            int actualCheckDigit = numbers[12];
+
+            return calculatedCheckDigit == actualCheckDigit;
         }
 
         public List<string> GetTicketListString() {

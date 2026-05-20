@@ -11,8 +11,7 @@ namespace WinkelDomein {
 
         // Check bij het opstarten of er al een logfile bestaat, zowel maak hem leeg, zoniet, maak hem aan
         public static void StartLogger() {
-            if (!File.Exists(LOGFILEPATH)) File.Create(LOGFILEPATH);
-            else File.WriteAllText(LOGFILEPATH, "");
+            File.Create(LOGFILEPATH).Dispose();
             SystemLog("KassaSysteem opgestart.");
         }
 

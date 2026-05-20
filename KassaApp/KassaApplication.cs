@@ -73,7 +73,7 @@ public class KassaApplication {
 
                 // Ticket parkeren
                 case "P":
-                    _kassa.ParkKassaTicket();
+                    _kassa.ParkTicket();
                     break;
 
                 // Ticket hervatten uit lijst van tickets

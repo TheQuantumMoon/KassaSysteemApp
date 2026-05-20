@@ -1,4 +1,6 @@
-﻿using WinkelDomein.Enum;
+﻿using System.Diagnostics.SymbolStore;
+using System.Net.Sockets;
+using WinkelDomein.Enum;
 using WinkelDomein.Interface;
 using WinkelDomein.Model;
 
@@ -8,6 +10,8 @@ namespace WinkelDomein {
         private List<Product> _possibleProducts = [];
         private List<KassaTicket> _tickets = [];
         private KassaTicket _currentTicket;
+        private const string PRODUCTSFILEPATH = @"Producten.txt";
+        private const string PARKEDTICKETSFILEPATH = @"ParkedTickets.txt";
 
         public KassaTicket CurrentTicket {
             get {
@@ -15,7 +19,6 @@ namespace WinkelDomein {
                 if (!_tickets.Contains(_currentTicket)) CurrentTicket = GetLastTicket();
                 return _currentTicket;
             }
-
             set => _currentTicket = value;
         }
         public bool HasTickets {
@@ -33,13 +36,15 @@ namespace WinkelDomein {
 
         private void StartKassa() {
             ParsePossibleProducts();
+            ParseParkedTickets();
             Logger.SystemLog(PossibleProductsCount + " producten ingeladen.");
             Logger.SystemLog("Geen kortingscodes beschikbaar.");
+            GenerateNewKassaTicket();
         }
 
         private void ParsePossibleProducts() {
-            string productsFilepath = @"Producten.txt";
-            string[] rawProducts = File.ReadAllLines(productsFilepath);
+            if (!File.Exists(PRODUCTSFILEPATH)) File.Create(PRODUCTSFILEPATH);
+            string[] rawProducts = File.ReadAllLines(PRODUCTSFILEPATH);
 
             foreach (var line in rawProducts) {
                 string[] productInfo = line.Split(';');
@@ -50,6 +55,38 @@ namespace WinkelDomein {
                 Product newProduct = new(code, name, price, btw);
                 _possibleProducts.Add(newProduct);
             }
+        }
+
+        private void ParseParkedTickets() {
+            if (!File.Exists(PARKEDTICKETSFILEPATH)) File.Create(PARKEDTICKETSFILEPATH);
+            string[] rawTickets = File.ReadAllLines(PARKEDTICKETSFILEPATH);
+
+            for (int i = 0; i < rawTickets.Length; i++) {
+                string[] rawTicket = rawTickets[i].Split(';');
+                DateTime creationTime = new(long.Parse(rawTicket[0]));
+                List<GescandProduct> scannedProducts = [];
+                for (int j = 1; j < rawTicket.Length; j += 2) {
+                    string productCode = rawTicket[j];
+                    int amount = int.Parse(rawTicket[j + 1]);
+                    Product product = _possibleProducts.Find(x => (x.Code == productCode)) ?? throw new Exception(message: "Productcode niet herkend bij geparkeerde tickets");
+                    GescandProduct scannedProduct = new(product, amount);
+                    scannedProducts.Add(scannedProduct);
+                }
+                KassaTicket ticket = new(creationTime, scannedProducts);
+                _tickets.Add(ticket);
+            }
+        }
+
+        private static void StoreTicket(KassaTicket ticket) {
+            string ticketToRecord = ticket.ToRecordString();
+            File.AppendAllText(PARKEDTICKETSFILEPATH, $"{ticketToRecord}\n");
+        }
+        private static void RemoveStoredTicket(KassaTicket ticket) {
+            string ticketTimeStamp = ticket.CreationDateTime.Ticks.ToString();
+            List<string> parkedTicketsString = [.. File.ReadAllLines(PARKEDTICKETSFILEPATH)];
+            int amountRemoved = parkedTicketsString.RemoveAll(x => x.StartsWith(ticketTimeStamp));
+            if (amountRemoved > 1) throw new Exception(message: "Meer dan 1 element is verwijderd uit de parked tickets opslag");
+            File.WriteAllLinesAsync(PARKEDTICKETSFILEPATH, parkedTicketsString);
         }
 
         public void GenerateNewKassaTicket() {
@@ -75,8 +112,9 @@ namespace WinkelDomein {
             CurrentTicket.UndoLastProductAmountChange();
         }
 
-        public void ParkKassaTicket() {
+        public void ParkTicket() {
             KassaTicket ticket = CurrentTicket;
+            StoreTicket(ticket);
             GenerateNewKassaTicket();
             Logger.LogParkTicket(ticket);
         }
@@ -107,12 +145,15 @@ namespace WinkelDomein {
 
         public void ResumeTicketByIndex(int index) {
             KassaTicket ticket = _tickets[index];
+            StoreTicket(CurrentTicket);
             CurrentTicket = ticket;
+            RemoveStoredTicket(ticket);
             Logger.LogResumeTicket(ticket);
         }
 
         private KassaTicket GetLastTicket() {
             KassaTicket ticket = _tickets[^1];
+            RemoveStoredTicket(ticket);
             return ticket;
         }
 

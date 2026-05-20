@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <Content Include="bin\Debug\net10.0\Log.txt" />
+    <Content Include="bin\Debug\net10.0\ParkedTickets.txt" />
     <Content Include="bin\Debug\net10.0\Producten.txt" />
   </ItemGroup>
 

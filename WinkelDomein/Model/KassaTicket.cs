@@ -4,34 +4,29 @@ using WinkelDomein.Enum;
 namespace WinkelDomein.Model {
     public class KassaTicket {
 
-        private static readonly Random _random = new(DateTime.Now.Millisecond);
-        private readonly List<GescandProduct> _scannedProducts = [];
-        private readonly List<KeyValuePair<Product, int>> _actionHistory = [];
-
         public const string SHOPNAME = "WARENHUIS OVERFLOW";
         public const string ADDRES = "Stapelplein 1, 9000 Gent";
         public const string TEL = "Tel: 09 234 56 78";
         public const string BTWNUMBER = "BTW: BE 0123.456.789";
 
-        private readonly string _ticketCode = "";
-        private readonly string _date = "";
-        private readonly string _cashRef = "";
+        private readonly DateTime _creationDateTime;
+        private static readonly Random _random = new(DateTime.Now.Millisecond);
+        private readonly List<GescandProduct> _scannedProducts = [];
+        private readonly List<KeyValuePair<Product, int>> _actionHistory = [];
+        private string _cashRef = "";
 
+        public DateTime CreationDateTime => _creationDateTime;
         /*  Ik ben op de hoogte dat er telkens een nieuw ticketnummer moet worden gegenereerd per aanpassing
             van het ticket, maar ik heb ervoor gekozen om dit niet te doen, omdat ik dit niet logisch vind
             in het kader van de log-functionaliteit. Dit zorgt er voor dat elke vermelding van de ticketcode
             in de log, buiten de laatste, nutteloos is */
-        public string TicketCode {
-            get => _ticketCode;
-            init => _ticketCode = value;
-        }
-        public string Date {
-            get => _date;
-            init => _date = value;
-        }
+        public string TicketCode => _creationDateTime.ToString("yyyy.MM.dd.HH.mm.ss.fff");
+        public string Date => _creationDateTime.ToString("yyyy-MM-dd HH:mm");
         public string CashRef {
-            get => _cashRef;
-            init => _cashRef = value;
+            get {
+                if (string.IsNullOrEmpty(_cashRef)) _cashRef = $"CASH-{_creationDateTime:yyyyMMdd}-{_random.Next(100000, 999999)}";
+                return _cashRef;
+            }
         }
 
         public decimal TotalPriceNoBtw {
@@ -58,10 +53,11 @@ namespace WinkelDomein.Model {
         public int AmountOfProducts => _scannedProducts.Count;
 
         public KassaTicket() {
-            DateTime now = DateTime.Now;
-            TicketCode = now.ToString("yyyy.MM.dd.HH.mm.ss.fff");
-            Date = now.ToString("yyyy-MM-dd HH:mm");
-            CashRef = $"CASH-{now:yyyyMMdd}-{_random.Next(100000, 999999)}";
+            _creationDateTime = DateTime.Now;
+        }
+        public KassaTicket(DateTime creationTime, List<GescandProduct> scannedProducts) {
+            _creationDateTime = creationTime;
+            _scannedProducts = scannedProducts;
         }
 
         /* Voegt een nieuw product toe aan het ticket moest het nog niet in ScannedProducts zitten,
@@ -130,6 +126,15 @@ namespace WinkelDomein.Model {
         }
 
         public override string ToString() => $"#{TicketCode} ({AmountOfProducts} producten)";
+
+        public string ToRecordString() {
+            StringBuilder output = new();
+            output.Append($"{_creationDateTime.Ticks}");
+            foreach (var scannedProduct in ScannedProducts) {
+                output.Append($";{scannedProduct.Product.Code};{scannedProduct.Quantity}");
+            }
+            return output.ToString();
+        }
 
         public string ToStringLayout(TicketSoort soort = TicketSoort.Normaal, BetaalDetails? betaalDetails = null,
             int ticketWidth = 42, int paddingLeft = 2) {

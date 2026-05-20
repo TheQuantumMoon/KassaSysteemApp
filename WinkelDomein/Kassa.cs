@@ -1,6 +1,5 @@
-﻿using System.Diagnostics.SymbolStore;
-using System.Net.Sockets;
-using WinkelDomein.Enum;
+﻿using System.Net.NetworkInformation;
+using WinkelDomein.Enums;
 using WinkelDomein.Interface;
 using WinkelDomein.Model;
 
@@ -53,7 +52,8 @@ namespace WinkelDomein {
                 string name = productInfo[1];
                 decimal price = decimal.Parse(productInfo[2]);
                 int btw = int.Parse(productInfo[3]);
-                Product newProduct = new(code, name, price, btw);
+                ProductCategorie category = Enum.Parse<ProductCategorie>(productInfo[4]);
+                Product newProduct = new(code, name, price, btw, category);
                 _possibleProducts.Add(newProduct);
             }
         }

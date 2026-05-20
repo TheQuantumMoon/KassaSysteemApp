@@ -1,5 +1,5 @@
 using WinkelDomein;
-using WinkelDomein.Enum;
+using WinkelDomein.Enums;
 using WinkelDomein.Model;
 using static System.Console;
 

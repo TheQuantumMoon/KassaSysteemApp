@@ -1,4 +1,4 @@
-﻿using WinkelDomein.Enum;
+﻿using WinkelDomein.Enums;
 using WinkelDomein.Model;
 
 namespace WinkelDomein {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WinkelDomein.Enum {
+namespace WinkelDomein.Enums {
     public enum TicketSoort {
         Normaal = 0,
         Cash = 1,

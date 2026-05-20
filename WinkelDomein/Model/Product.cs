@@ -1,15 +1,19 @@
-﻿namespace WinkelDomein.Model {
+﻿using WinkelDomein.Enums;
+
+namespace WinkelDomein.Model {
     public class Product {
         private readonly string _code = "";
         private readonly string _name = "";
         private readonly decimal _price;
         private readonly int _btw;
+        private readonly ProductCategorie _category;
 
-        public Product(string code, string name, decimal price, int btw) {
+        public Product(string code, string name, decimal price, int btw, ProductCategorie category) {
             Code = code;
             Name = name;
             Price = price;
             Btw = btw;
+            Category = category;
         }
 
         public string Code {
@@ -39,6 +43,11 @@
                 ArgumentOutOfRangeException.ThrowIfLessThan(value, 0);
                 _btw = value;
             }
+        }
+
+        public ProductCategorie Category {
+            get => _category;
+            init => _category = value;
         }
 
         public override string ToString() => $"{Name} ({Code})";

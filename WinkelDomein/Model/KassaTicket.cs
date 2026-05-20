@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using WinkelDomein.Enum;
+using WinkelDomein.Enums;
 
 namespace WinkelDomein.Model {
     public class KassaTicket {

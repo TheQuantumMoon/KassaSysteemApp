@@ -36,8 +36,8 @@ namespace WinkelDomein {
         private void StartKassa() {
             ParsePossibleProducts();
             ParseParkedTickets();
-            Logger.SystemLog(PossibleProductsCount + " producten ingeladen.");
             Logger.SystemLog("Geen kortingscodes beschikbaar.");
+
             GenerateNewKassaTicket();
         }
 
@@ -56,6 +56,7 @@ namespace WinkelDomein {
                 Product newProduct = new(code, name, price, btw, category);
                 _possibleProducts.Add(newProduct);
             }
+            Logger.SystemLog(PossibleProductsCount + " producten ingeladen.");
         }
 
         private void ParseParkedTickets() {
@@ -76,6 +77,7 @@ namespace WinkelDomein {
                 KassaTicket ticket = new(creationTime, scannedProducts);
                 _tickets.Add(ticket);
             }
+            Logger.SystemLog(_tickets.Count + " geparkeerde tickets ingeladen");
         }
 
         private static void StoreTicket(KassaTicket ticket) {

@@ -17,7 +17,7 @@ namespace WinkelDomein.Model {
 
         public DateTime CreationDateTime {
             get => _creationDateTime;
-            init =>_creationDateTime = value;
+            init => _creationDateTime = value;
         }
         /*  Ik ben op de hoogte dat er telkens een nieuw ticketnummer moet worden gegenereerd per aanpassing
    van het ticket, maar ik heb ervoor gekozen om dit niet te doen, omdat ik dit niet logisch vind

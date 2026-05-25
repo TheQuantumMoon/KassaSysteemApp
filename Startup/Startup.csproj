@@ -8,10 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="bin\Debug\net10.0\Kortingen.txt" />
-    <Content Include="bin\Debug\net10.0\Log.txt" />
-    <Content Include="bin\Debug\net10.0\ParkedTickets.txt" />
-    <Content Include="bin\Debug\net10.0\Producten.txt" />
+    <Compile Remove="bin\**" />
+    <EmbeddedResource Remove="bin\**" />
+    <None Remove="bin\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,10 +18,6 @@
     <ProjectReference Include="..\DataOpslag\DataOpslag.csproj" />
     <ProjectReference Include="..\KassaApp\KassaApp.csproj" />
     <ProjectReference Include="..\WinkelDomein\WinkelDomein.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="bin\Debug\net10.0\SavedTickets\" />
   </ItemGroup>
 
 </Project>

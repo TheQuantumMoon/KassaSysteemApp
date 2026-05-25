@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BetaalSysteemMock\BetaalSysteemMock.csproj" />
+    <ProjectReference Include="..\DataOpslag\DataOpslag.csproj" />
     <ProjectReference Include="..\KassaApp\KassaApp.csproj" />
     <ProjectReference Include="..\WinkelDomein\WinkelDomein.csproj" />
   </ItemGroup>

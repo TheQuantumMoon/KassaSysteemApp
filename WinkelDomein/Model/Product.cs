@@ -73,18 +73,19 @@ namespace WinkelDomein.Model {
 
         // Checkt of de ingegeven string een valide EAN13 barcode is
         public static bool IsEan13(string barcode) {
+            int codeLength = 13;
             if (string.IsNullOrWhiteSpace(barcode) || barcode.Length != 13 || !barcode.All(char.IsDigit)) return false;
             int[] numbers = [.. barcode.Select(x => x - '0')];
 
             int sum = 0;
-            for (int i = 0; i < 12; i++) {
+            for (int i = 0; i < codeLength - 1; i++) {
                 int digit = numbers[i];
                 if (i % 2 == 0) sum += digit * 1;
                 else sum += digit * 3;
             }
             int remainder = sum % 10;
             int calculatedCheckDigit = (remainder == 0) ? 0 : 10 - remainder;
-            int actualCheckDigit = numbers[12];
+            int actualCheckDigit = numbers[codeLength - 1];
 
             return calculatedCheckDigit == actualCheckDigit;
         }

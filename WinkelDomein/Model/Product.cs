@@ -64,9 +64,8 @@ namespace WinkelDomein.Model {
         }
         public bool HasActiveReduction {
             get {
-                DateOnly today = DateOnly.FromDateTime(DateTime.Now);
                 if (Reduction == null) return false;
-                if (today < Reduction.StartDate || Reduction.EndDate < today) return false;
+                if (!Reduction.IsActive) return false;
                 return true;
             }
         }

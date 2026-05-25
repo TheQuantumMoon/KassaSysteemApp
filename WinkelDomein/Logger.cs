@@ -22,7 +22,7 @@ namespace WinkelDomein {
         }
 
         // Voor het wegschrijven van kassatickets (stringlayout) naar apparte tekstfiles op de opgegeven savedticketspath
-        public static void SaveTicket(KassaTicket kassaTicket, TicketSoort soort = TicketSoort.Normaal, BetaalDetails betaalDetails = default) {
+        public static void SaveTicket(KassaTicket kassaTicket, TicketSoort soort = TicketSoort.Normaal, BetaalDetails? betaalDetails = null) {
             string fileName = Path.Combine(SAVEDTICKETSPATH, $"kassaticket-{kassaTicket.TicketCode}.txt");
             File.WriteAllText(fileName, kassaTicket.ToStringLayout(soort, betaalDetails));
             string message = $"{Now} {SYSTEMTAG} Ticket opgeslagen {kassaTicket.TicketCode}";

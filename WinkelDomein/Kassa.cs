@@ -9,7 +9,7 @@ namespace WinkelDomein {
         private readonly List<Korting> _reductions = [];
         private readonly List<Product> _possibleProducts = [];
         private readonly List<KassaTicket> _tickets = [];
-        private KassaTicket _currentTicket;
+        private KassaTicket _currentTicket = default!;
         private const string PRODUCTSFILEPATH = @"Producten.txt";
         private const string PARKEDTICKETSFILEPATH = @"ParkedTickets.txt";
         private const string REDUCTIONSFILEPATH = @"Kortingen.txt";

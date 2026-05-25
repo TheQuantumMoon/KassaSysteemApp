@@ -6,7 +6,7 @@ namespace WinkelDomein.Model {
     public class GescandProduct {
 
         private int _quantity;
-        private readonly Product _product;
+        private readonly Product _product = default!;
 
         public GescandProduct(Product product, int quantity) {
             Product = product;

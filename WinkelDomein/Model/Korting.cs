@@ -34,6 +34,13 @@ namespace WinkelDomein.Model {
             get => _endDate;
             init => _endDate = value; 
         }
+        public bool IsActive {
+            get {
+                DateOnly today = DateOnly.FromDateTime(DateTime.Now);
+                if (today >= StartDate && EndDate >= today) return true;
+                return false;
+            }
+        }
 
         public override string ToString() {
             return $"  --> {ReductionPercentage}% korting tot {EndDate}";

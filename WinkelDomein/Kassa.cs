@@ -1,5 +1,4 @@
-﻿using System.Net.NetworkInformation;
-using WinkelDomein.Enums;
+﻿using WinkelDomein.Enums;
 using WinkelDomein.Interface;
 using WinkelDomein.Model;
 
@@ -11,6 +10,7 @@ namespace WinkelDomein {
         private KassaTicket _currentTicket;
         private const string PRODUCTSFILEPATH = @"Producten.txt";
         private const string PARKEDTICKETSFILEPATH = @"ParkedTickets.txt";
+        private const string REDUCTIONSFILEPATH = @"Kortingen.txt";
 
         public KassaTicket CurrentTicket {
             get {
@@ -30,13 +30,13 @@ namespace WinkelDomein {
 
         public Kassa(IBetaalTerminal betaalTerminal) {
             _betaalTerminal = betaalTerminal;
-            StartKassa();
+            Start();
         }
 
-        private void StartKassa() {
+        private void Start() {
             ParsePossibleProducts();
             ParseParkedTickets();
-            Logger.SystemLog("Geen kortingscodes beschikbaar.");
+            ParseReductions();
 
             GenerateNewKassaTicket();
         }
@@ -78,6 +78,14 @@ namespace WinkelDomein {
                 _tickets.Add(ticket);
             }
             Logger.SystemLog(_tickets.Count + " geparkeerde tickets ingeladen");
+        }
+
+        private void ParseReductions() {
+            if (!File.Exists(REDUCTIONSFILEPATH)) File.Create(REDUCTIONSFILEPATH);
+            string[] rawReductions = File.ReadAllLines(REDUCTIONSFILEPATH);
+            if (rawReductions.Length == 0) Logger.SystemLog("Geen kortingscodes beschikbaar."); return;
+
+
         }
 
         private static void StoreTicket(KassaTicket ticket) {

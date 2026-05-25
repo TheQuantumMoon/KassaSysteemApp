@@ -24,7 +24,8 @@ public class KassaApplication {
             if (Kassa.IsEan13(input)) {
                 Product? product = _kassa.GetProductByCode(input);
                 if (product != null) {
-                    _kassa.IncreaseProduct(product);
+                    try { _kassa.IncreaseProduct(product); }
+                    catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     continue;
                 }
             }
@@ -32,7 +33,8 @@ public class KassaApplication {
             // Check of de input een int is, zoja pas het aantal van het laast ingegeven product aan
             bool isInt = int.TryParse(input, out int amount);
             if (isInt) {
-                try { _kassa.IncreaseLastProduct(amount); } catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
+                try { _kassa.IncreaseLastProduct(amount); }
+                catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                 continue;
             }
 
@@ -43,12 +45,14 @@ public class KassaApplication {
                     Write("Barcode: ");
                     input = AskInput().Trim();
                     Product? product = _kassa.GetProductByCode(input);
-                    try { _kassa.DiminishProduct(product); } catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
+                    try { _kassa.DiminishProduct(product); }
+                    catch (ArgumentException ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     break;
 
                 // Undo de laatste scan, toevoeging van aantal of verwijdering van een product
                 case "Z":
-                    try { _kassa.UndoLastProductAmountChange(); } catch (Exception ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
+                    try { _kassa.UndoLastProductAmountChange(); }
+                    catch (Exception ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     break;
 
                 // Betalen met kaart
@@ -60,7 +64,8 @@ public class KassaApplication {
                         continue;
                     }
                     DisplayTicket(TicketSoort.Kaart, result);
-                    _kassa.FinishTicketCard(result);
+                    try { _kassa.FinishTicketCard(result); }
+                    catch (Exception ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     break;
 
                 // Betalen met cash
@@ -70,12 +75,14 @@ public class KassaApplication {
                         continue;
                     }
                     DisplayTicket(TicketSoort.Cash);
-                    _kassa.FinishTicketCash();
+                    try { _kassa.FinishTicketCash(); }
+                    catch (Exception ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     break;
 
                 // Ticket parkeren
                 case "P":
-                    _kassa.ParkTicket();
+                    try { _kassa.ParkTicket(); }
+                    catch (Exception ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     break;
 
                 // Ticket hervatten uit lijst van tickets
@@ -90,12 +97,14 @@ public class KassaApplication {
                         WriteLineInColor("Verkeerde input", ConsoleColor.Red);
                         continue;
                     }
-                    _kassa.ResumeTicketByIndex(choice - 1);
+                    try { _kassa.ResumeTicketByIndex(choice - 1); }
+                    catch (Exception ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     break;
 
                 // Huidig ticket annuleren (en loggen)
                 case "A":
-                    _kassa.RemoveTicket();
+                    try { _kassa.RemoveTicket(); }
+                    catch (Exception ex) { WriteLineInColor(ex.Message, ConsoleColor.Red); }
                     break;
 
                 // Fallback voor onverwachte inputs

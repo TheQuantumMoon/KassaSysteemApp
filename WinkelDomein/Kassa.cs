@@ -76,7 +76,7 @@ namespace WinkelDomein {
         public void FinishTicketCash() {
             KassaTicket ticket = CurrentTicket;
             bool succes = _tickets.Remove(ticket);
-            if (!succes) throw new ArgumentException(message: "Ticket niet afegrond");
+            if (!succes) throw new ArgumentException(message: "Ticket niet afgerond");
             Logger.LogPaidTicketCash(ticket);
             Logger.SaveTicket(ticket, TicketSoort.Cash);
         }

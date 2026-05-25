@@ -22,12 +22,7 @@ namespace WinkelDomein.Model {
             in de log, buiten de laatste, nutteloos is */
         public string TicketCode => _creationDateTime.ToString("yyyy.MM.dd.HH.mm.ss.fff");
         public string Date => _creationDateTime.ToString("yyyy-MM-dd HH:mm");
-        public string CashRef {
-            get {
-                if (string.IsNullOrEmpty(_cashRef)) _cashRef = $"CASH-{_creationDateTime:yyyyMMdd}-{_random.Next(100000, 999999)}";
-                return _cashRef;
-            }
-        }
+        public string CashRef => _cashRef;
 
         public decimal TotalPriceNoBtw {
             get {
@@ -54,8 +49,9 @@ namespace WinkelDomein.Model {
 
         public KassaTicket() {
             _creationDateTime = DateTime.Now;
+            _cashRef = $"CASH-{_creationDateTime:yyyyMMdd}-{_random.Next(100000, 999999)}";
         }
-        public KassaTicket(DateTime creationTime, List<GescandProduct> scannedProducts) {
+        public KassaTicket(DateTime creationTime, List<GescandProduct> scannedProducts) : this() {
             _creationDateTime = creationTime;
             _scannedProducts = scannedProducts;
         }

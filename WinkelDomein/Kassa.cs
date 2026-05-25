@@ -48,14 +48,22 @@ namespace WinkelDomein {
             }
             foreach (var rawReduction in rawReductions) {
                 string[] rawReductionSplit = rawReduction.Split(';');
-                if (!Enum.TryParse(rawReductionSplit[0], ignoreCase: true, out ProductCategorie category))
-                    throw new ArgumentException(message: "Foute productcategorie in kortingen");
-                if (!int.TryParse(rawReductionSplit[1], out int reductionPercentage))
-                    throw new ArgumentException(message: "Fout kortingspercentage in kortingen");
-                if (!DateOnly.TryParseExact(rawReductionSplit[2], "yyyy/MM/dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly startDate))
-                    throw new ArgumentException(message: "Foute startdatum in kortingen");
-                if (!DateOnly.TryParseExact(rawReductionSplit[3], "yyyy/MM/dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly endDate))
-                    throw new ArgumentException(message: "Foute einddatum in kortingen");
+                if (!Enum.TryParse(rawReductionSplit[0], ignoreCase: true, out ProductCategorie category)) {
+                    Logger.LogError("Foute productcategorie in kortingen");
+                    continue;
+                }
+                if (!int.TryParse(rawReductionSplit[1], out int reductionPercentage)) {
+                    Logger.LogError("Fout kortingspercentage in kortingen");
+                    continue;
+                }
+                if (!DateOnly.TryParseExact(rawReductionSplit[2], "yyyy/MM/dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly startDate)) {
+                    Logger.LogError("Foute startdatum in kortingen");
+                    continue;
+                }
+                if (!DateOnly.TryParseExact(rawReductionSplit[3], "yyyy/MM/dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly endDate)) {
+                    Logger.LogError("Foute einddatum in kortingen");
+                    continue;
+                }
                 Korting newReduction = new(category, reductionPercentage, startDate, endDate);
                 _reductions.Add(newReduction);
             }

@@ -22,6 +22,7 @@ namespace WinkelDomein.Model {
             get => _code;
             init {
                 ArgumentException.ThrowIfNullOrWhiteSpace(value);
+                if (!IsEan13(value)) throw new ArgumentException(message: "Productcode is niet EAN13-conform");
                 _code = value;
             }
         }
@@ -68,6 +69,24 @@ namespace WinkelDomein.Model {
                 if (!Reduction.IsActive) return false;
                 return true;
             }
+        }
+
+        // Checkt of de ingegeven string een valide EAN13 barcode is
+        public static bool IsEan13(string barcode) {
+            if (string.IsNullOrWhiteSpace(barcode) || barcode.Length != 13 || !barcode.All(char.IsDigit)) return false;
+            int[] numbers = [.. barcode.Select(x => x - '0')];
+
+            int sum = 0;
+            for (int i = 0; i < 12; i++) {
+                int digit = numbers[i];
+                if (i % 2 == 0) sum += digit * 1;
+                else sum += digit * 3;
+            }
+            int remainder = sum % 10;
+            int calculatedCheckDigit = (remainder == 0) ? 0 : 10 - remainder;
+            int actualCheckDigit = numbers[12];
+
+            return calculatedCheckDigit == actualCheckDigit;
         }
 
         public override string ToString() => $"{Name} ({Code})";

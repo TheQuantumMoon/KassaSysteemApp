@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Xml.Linq;
 using WinkelDomein.Enums;
 using WinkelDomein.Interface;
 using WinkelDomein.Model;
@@ -64,7 +65,9 @@ namespace WinkelDomein {
                     Logger.LogError("Foute einddatum in kortingen");
                     continue;
                 }
-                Korting newReduction = new(category, reductionPercentage, startDate, endDate);
+                Korting newReduction;
+                try { newReduction = new(category, reductionPercentage, startDate, endDate); }
+                catch { Logger.LogError("Fout bij aanmaken korting"); continue; }
                 _reductions.Add(newReduction);
             }
             Logger.GeneralLog($"{_reductions.Count} kortingscode(s) ingeladen");
@@ -73,17 +76,31 @@ namespace WinkelDomein {
         private void ParsePossibleProducts() {
             if (!File.Exists(PRODUCTSFILEPATH)) File.Create(PRODUCTSFILEPATH);
             string[] rawProducts = File.ReadAllLines(PRODUCTSFILEPATH);
-
+            if (rawProducts.Length == 0) {
+                Logger.GeneralLog("Geen producten beschikbaar");
+                return;
+            }
             foreach (var line in rawProducts) {
                 string[] productInfo = line.Split(';');
                 string code = productInfo[0];
-                if (!IsEan13(code)) throw new Exception(message: "Barcode is niet conform met de EAN13-standaard");
                 string name = productInfo[1];
-                decimal price = decimal.Parse(productInfo[2]);
-                int btw = int.Parse(productInfo[3]);
-                ProductCategorie category = Enum.Parse<ProductCategorie>(productInfo[4]);
+                if (!decimal.TryParse(productInfo[2], out decimal price)) {
+                    Logger.LogError("Foute prijs in producten");
+                    continue;
+                }
+                if (!int.TryParse(productInfo[3], out int btw)) {
+                    Logger.LogError("Foute btw in producten");
+                    continue;
+                }
+                if (!Enum.TryParse(productInfo[4], ignoreCase: true, out ProductCategorie category)) {
+                    Logger.LogError("Foute productcategorie in producten");
+                    continue;
+                }
                 Korting? possibleReduction = _reductions.Find((x) => x.Category == category);
-                Product newProduct = new(code, name, price, btw, category, possibleReduction);
+
+                Product newProduct;
+                try { newProduct = new(code, name, price, btw, category, possibleReduction); }
+                catch { Logger.LogError("Fout bij aanmaken product"); continue; }
                 _possibleProducts.Add(newProduct);
             }
             Logger.GeneralLog(PossibleProductsCount + " producten ingeladen");
@@ -95,16 +112,31 @@ namespace WinkelDomein {
 
             for (int i = 0; i < rawTickets.Length; i++) {
                 string[] rawTicket = rawTickets[i].Split(';');
-                DateTime creationTime = new(long.Parse(rawTicket[0]));
+                if (!long.TryParse(rawTicket[0], out long dateAsNumber)) {
+                    Logger.LogError("Foute creatietijd in geparkeerde tickets");
+                    continue;
+                }
+                DateTime creationTime;
+                try { creationTime = new(dateAsNumber); }
+                catch { Logger.LogError("Foute creatietijd in geparkeerde tickets"); continue; }
+
                 List<GescandProduct> scannedProducts = [];
                 for (int j = 1; j < rawTicket.Length; j += 2) {
                     string productCode = rawTicket[j];
-                    int amount = int.Parse(rawTicket[j + 1]);
-                    Product product = _possibleProducts.Find(x => (x.Code == productCode)) ?? throw new Exception(message: "Productcode niet herkend bij geparkeerde tickets");
-                    GescandProduct scannedProduct = new(product, amount);
+                    if (!int.TryParse(rawTicket[j + 1], out int amount)) {
+                        Logger.LogError("Fout aantal in gescande producten in geparkeerde tickets");
+                        continue;
+                    }
+                    Product? product = _possibleProducts.Find(x => (x.Code == productCode));
+                    GescandProduct scannedProduct;
+                    try { scannedProduct = new(product!, amount); }
+                    catch { Logger.LogError("Foute gescande product in geparkeerde tickets"); continue; }
                     scannedProducts.Add(scannedProduct);
                 }
-                KassaTicket ticket = new(creationTime, scannedProducts);
+
+                KassaTicket ticket;
+                try { ticket = new(creationTime, scannedProducts); }
+                catch { Logger.LogError("Fout bij aanmaken ticket"); continue; }
                 _tickets.Add(ticket);
             }
             Logger.GeneralLog(_tickets.Count + " geparkeerde tickets ingeladen");
@@ -190,22 +222,8 @@ namespace WinkelDomein {
             return ticket;
         }
 
-        // Checkt of de ingegeven string een valide EAN13 barcode is
-        public static bool IsEan13(string barcode) {
-            if (string.IsNullOrWhiteSpace(barcode) || barcode.Length != 13 || !barcode.All(char.IsDigit)) return false;
-            int[] numbers = [.. barcode.Select(x => x - '0')];
-
-            int sum = 0;
-            for (int i = 0; i < 12; i++) {
-                int digit = numbers[i];
-                if (i % 2 == 0) sum += digit * 1;
-                else sum += digit * 3;
-            }
-            int remainder = sum % 10;
-            int calculatedCheckDigit = (remainder == 0) ? 0 : 10 - remainder;
-            int actualCheckDigit = numbers[12];
-
-            return calculatedCheckDigit == actualCheckDigit;
+        public static bool IsEan13(string code) {
+            return Product.IsEan13(code);
         }
 
         public List<string> GetTicketListString() {

@@ -29,6 +29,12 @@ namespace WinkelDomein {
             AddLog(message);
         }
 
+        // Voor het loggen van een niet-kritieke fout
+        public static void LogError(string text) {
+            string message = $"{Now} {SYSTEMTAG} ERROR! {text}";
+            AddLog(message);
+        }
+
         // Voor het loggen van de creatie van een nieuw kassaticket
         public static void LogNewTicket(KassaTicket kassaTicket) {
             string message = $"{Now} {REGISTERTAG} NIEUW TICKET {kassaTicket.TicketCode}";

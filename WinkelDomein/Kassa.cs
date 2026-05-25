@@ -22,12 +22,8 @@ namespace WinkelDomein {
             }
             set => _currentTicket = value;
         }
-        public bool HasTickets {
-            get => _tickets.Count != 0;
-        }
-        public int TicketCount {
-            get => _tickets.Count;
-        }
+        public bool HasTickets => _tickets.Count != 0;
+        public int TicketCount => _tickets.Count;
         public int PossibleProductsCount => _possibleProducts.Count;
 
         public Kassa(IBetaalTerminal betaalTerminal) {

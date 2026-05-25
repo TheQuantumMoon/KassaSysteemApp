@@ -12,11 +12,11 @@ namespace WinkelDomein {
         // Check bij het opstarten of er al een logfile bestaat, zowel maak hem leeg, zoniet, maak hem aan
         public static void StartLogger() {
             File.Create(LOGFILEPATH).Dispose();
-            SystemLog("KassaSysteem opgestart.");
+            GeneralLog("KassaSysteem opgestart");
         }
 
         // Voor het loggen van algemene variabele systeemboodschappen
-        public static void SystemLog(string text) {
+        public static void GeneralLog(string text) {
             string message = $"{Now} {SYSTEMTAG} {text}";
             AddLog(message);
         }

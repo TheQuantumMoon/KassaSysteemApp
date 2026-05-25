@@ -6,9 +6,9 @@ using WinkelDomein.Model;
 namespace WinkelDomein {
     public class Kassa {
         private readonly IBetaalTerminal _betaalTerminal;
-        private List<Product> _possibleProducts = [];
-        private List<Korting> _reductions = [];
-        private List<KassaTicket> _tickets = [];
+        private readonly List<Korting> _reductions = [];
+        private readonly List<Product> _possibleProducts = [];
+        private readonly List<KassaTicket> _tickets = [];
         private KassaTicket _currentTicket;
         private const string PRODUCTSFILEPATH = @"Producten.txt";
         private const string PARKEDTICKETSFILEPATH = @"ParkedTickets.txt";
@@ -36,11 +36,34 @@ namespace WinkelDomein {
         }
 
         private void Start() {
-            ParsePossibleProducts();
             ParseReductions();
+            ParsePossibleProducts();
             ParseParkedTickets();
 
             GenerateNewKassaTicket();
+        }
+
+        private void ParseReductions() {
+            if (!File.Exists(REDUCTIONSFILEPATH)) File.Create(REDUCTIONSFILEPATH);
+            string[] rawReductions = File.ReadAllLines(REDUCTIONSFILEPATH);
+            if (rawReductions.Length == 0) {
+                Logger.GeneralLog("Geen kortingscodes beschikbaar");
+                return;
+            }
+            foreach (var rawReduction in rawReductions) {
+                string[] rawReductionSplit = rawReduction.Split(';');
+                if (!Enum.TryParse(rawReductionSplit[0], ignoreCase: true, out ProductCategorie category))
+                    throw new ArgumentException(message: "Foute productcategorie in kortingen");
+                if (!int.TryParse(rawReductionSplit[1], out int reductionPercentage))
+                    throw new ArgumentException(message: "Fout kortingspercentage in kortingen");
+                if (!DateOnly.TryParseExact(rawReductionSplit[2], "yyyy/MM/dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly startDate))
+                    throw new ArgumentException(message: "Foute startdatum in kortingen");
+                if (!DateOnly.TryParseExact(rawReductionSplit[3], "yyyy/MM/dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly endDate))
+                    throw new ArgumentException(message: "Foute einddatum in kortingen");
+                Korting newReduction = new(category, reductionPercentage, startDate, endDate);
+                _reductions.Add(newReduction);
+            }
+            Logger.GeneralLog($"{_reductions.Count} kortingscode(s) ingeladen");
         }
 
         private void ParsePossibleProducts() {
@@ -55,10 +78,11 @@ namespace WinkelDomein {
                 decimal price = decimal.Parse(productInfo[2]);
                 int btw = int.Parse(productInfo[3]);
                 ProductCategorie category = Enum.Parse<ProductCategorie>(productInfo[4]);
-                Product newProduct = new(code, name, price, btw, category);
+                Korting? possibleReduction = _reductions.Find((x) => x.Category == category);
+                Product newProduct = new(code, name, price, btw, category, possibleReduction);
                 _possibleProducts.Add(newProduct);
             }
-            Logger.SystemLog(PossibleProductsCount + " producten ingeladen.");
+            Logger.GeneralLog(PossibleProductsCount + " producten ingeladen");
         }
 
         private void ParseParkedTickets() {
@@ -79,29 +103,7 @@ namespace WinkelDomein {
                 KassaTicket ticket = new(creationTime, scannedProducts);
                 _tickets.Add(ticket);
             }
-            Logger.SystemLog(_tickets.Count + " geparkeerde tickets ingeladen");
-        }
-
-        private void ParseReductions() {
-            if (!File.Exists(REDUCTIONSFILEPATH)) File.Create(REDUCTIONSFILEPATH);
-            string[] rawReductions = File.ReadAllLines(REDUCTIONSFILEPATH);
-            if (rawReductions.Length == 0) {
-                Logger.SystemLog("Geen kortingscodes beschikbaar.");
-                return;
-            }
-            foreach (var rawReduction in rawReductions) {
-                string[] rawReductionSplit = rawReduction.Split(';');
-                if (!Enum.TryParse(rawReductionSplit[0], ignoreCase: true, out ProductCategorie category)) 
-                    throw new ArgumentException(message: "Foute productcategorie in kortingen");
-                if (!int.TryParse(rawReductionSplit[1], out int reductionPercentage))
-                    throw new ArgumentException(message: "Fout kortingspercentage in kortingen");
-                if (!DateOnly.TryParseExact(rawReductionSplit[2], "yyyy/MM/dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly startDate))
-                    throw new ArgumentException(message: "Foute startdatum in kortingen");
-                if (!DateOnly.TryParseExact(rawReductionSplit[3], "yyyy/MM/dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly endDate))
-                    throw new ArgumentException(message: "Foute einddatum in kortingen");
-                Korting newReduction = new(category, reductionPercentage, startDate, endDate);
-                _reductions.Add(newReduction);
-            }
+            Logger.GeneralLog(_tickets.Count + " geparkeerde tickets ingeladen");
         }
 
         private static void StoreTicket(KassaTicket ticket) {

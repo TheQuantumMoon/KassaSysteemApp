@@ -42,7 +42,7 @@ namespace WinkelDomein.Model {
             get {
                 decimal totalPrice = 0m;
                 foreach (var scannedProduct in _scannedProducts) {
-                    totalPrice += scannedProduct.Quantity * scannedProduct.Product.Price * (scannedProduct.Product.Btw / 100m);
+                    totalPrice += scannedProduct.Quantity * scannedProduct.Product.PriceOnlyBtw;
                 }
                 return Math.Round(totalPrice, 2);
             }
@@ -187,7 +187,10 @@ namespace WinkelDomein.Model {
             string StringScannedProducts(int ticketWidth, string p){
                 StringBuilder result = new();
                 if (HasScannedProducts) {
-                    foreach (var product in ScannedProducts) result.AppendLine($"{p}  {product}");
+                    foreach (var product in ScannedProducts) {
+                        result.AppendLine($"{p}  {product}");
+                        if(product.Product.HasActiveReduction) result.AppendLine($"{p}  {product.Product.Reduction}");
+                    }
                     result.Append(
                         $"{StringThinLine(ticketWidth)}\n" +
                         $"{p}Subtotaal excl. BTW:\t€   {TotalPriceNoBtw}\n" +

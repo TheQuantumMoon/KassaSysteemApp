@@ -34,5 +34,9 @@ namespace WinkelDomein.Model {
             get => _endDate;
             init => _endDate = value; 
         }
+
+        public override string ToString() {
+            return $"  --> {ReductionPercentage}% korting tot {EndDate}";
+        }
     }
 }

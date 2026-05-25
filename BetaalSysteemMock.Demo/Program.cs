@@ -63,14 +63,11 @@ Console.WriteLine();
 
 BetaalDetails? resultaat = terminal.VerzoekBetaling(25.50m, "Demo Winkel - Test");
 
-if (resultaat == null)
-{
+if (resultaat == null) {
     Console.ForegroundColor = ConsoleColor.Red;
     Console.WriteLine("Betaling mislukt of geweigerd.");
     Console.ResetColor();
-}
-else
-{
+} else {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Betaling geslaagd!");
     Console.ResetColor();
@@ -95,19 +92,15 @@ IBetaalTerminal snelleTerminal = new MockBetaalTerminal(minWachtMs: 50, maxWacht
 int geslaagd = 0;
 int mislukt = 0;
 
-for (int i = 1; i <= 20; i++)
-{
+for (int i = 1; i <= 20; i++) {
     Console.Write($"  Poging {i,2}: ");
     BetaalDetails? r = snelleTerminal.VerzoekBetaling(10.00m, "Snelle test");
-    if (r == null)
-    {
+    if (r == null) {
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine("GEWEIGERD");
         Console.ResetColor();
         mislukt++;
-    }
-    else
-    {
+    } else {
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine($"OK — {r.KaartType} {r.KaartVariant} ({r.Methode})");
         Console.ResetColor();

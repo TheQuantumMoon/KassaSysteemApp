@@ -15,9 +15,9 @@ namespace WinkelDomein.Model {
             if (StartDate > EndDate) throw new Exception(message: "Startdatum mag niet na einddatum komen");
         }
 
-        public ProductCategorie Category { 
-            get => _category; 
-            init => _category = value; 
+        public ProductCategorie Category {
+            get => _category;
+            init => _category = value;
         }
         public int ReductionPercentage {
             get => _reductionPercentage;
@@ -26,13 +26,13 @@ namespace WinkelDomein.Model {
                 _reductionPercentage = value;
             }
         }
-        public DateOnly StartDate { 
+        public DateOnly StartDate {
             get => _startDate;
-            init => _startDate = value; 
+            init => _startDate = value;
         }
-        public DateOnly EndDate { 
+        public DateOnly EndDate {
             get => _endDate;
-            init => _endDate = value; 
+            init => _endDate = value;
         }
         public bool IsActive {
             get {

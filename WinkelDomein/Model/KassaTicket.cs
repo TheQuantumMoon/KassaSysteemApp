@@ -70,7 +70,7 @@ namespace WinkelDomein.Model {
                 GescandProduct newGescandProduct = new(product, amount);
                 _scannedProducts.Add(newGescandProduct);
             } else {
-                foundGescandProduct.Quantity += amount;;
+                foundGescandProduct.Quantity += amount; ;
             }
             if (actionHistory) _actionHistory.Add(new(product, amount));
             Logger.LogScanProduct(this, product, amount);
@@ -184,12 +184,12 @@ namespace WinkelDomein.Model {
                 $"{CenterString(BTWNUMBER, ticketWidth)}\n";
                 return result;
             }
-            string StringScannedProducts(int ticketWidth, string p){
+            string StringScannedProducts(int ticketWidth, string p) {
                 StringBuilder result = new();
                 if (HasScannedProducts) {
                     foreach (var product in ScannedProducts) {
                         result.AppendLine($"{p}  {product}");
-                        if(product.Product.HasActiveReduction) result.AppendLine($"{p}  {product.Product.Reduction}");
+                        if (product.Product.HasActiveReduction) result.AppendLine($"{p}  {product.Product.Reduction}");
                     }
                     result.Append(
                         $"{StringThinLine(ticketWidth)}\n" +

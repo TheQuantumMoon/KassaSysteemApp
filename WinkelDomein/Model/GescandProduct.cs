@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace WinkelDomein.Model {
+﻿namespace WinkelDomein.Model {
     public class GescandProduct {
 
         private int _quantity;
@@ -20,12 +16,12 @@ namespace WinkelDomein.Model {
                 _product = value;
             }
         }
-        public int Quantity { 
-            get => _quantity; 
+        public int Quantity {
+            get => _quantity;
             set {
                 ArgumentOutOfRangeException.ThrowIfLessThan(value, 1);
                 _quantity = value;
-            } 
+            }
         }
 
         public override string ToString() => $"{Quantity}x {Product.Name} €{Product.Price} {Product.Btw}%";

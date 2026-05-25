@@ -15,14 +15,20 @@ namespace WinkelDomein.Model {
         private readonly List<KeyValuePair<Product, int>> _actionHistory = [];
         private string _cashRef = "";
 
-        public DateTime CreationDateTime => _creationDateTime;
+        public DateTime CreationDateTime {
+            get => _creationDateTime;
+            init =>_creationDateTime = value;
+        }
         /*  Ik ben op de hoogte dat er telkens een nieuw ticketnummer moet worden gegenereerd per aanpassing
-            van het ticket, maar ik heb ervoor gekozen om dit niet te doen, omdat ik dit niet logisch vind
-            in het kader van de log-functionaliteit. Dit zorgt er voor dat elke vermelding van de ticketcode
-            in de log, buiten de laatste, nutteloos is */
+   van het ticket, maar ik heb ervoor gekozen om dit niet te doen, omdat ik dit niet logisch vind
+   in het kader van de log-functionaliteit. Dit zorgt er voor dat elke vermelding van de ticketcode
+   in de log, buiten de laatste, nutteloos is */
         public string TicketCode => _creationDateTime.ToString("yyyy.MM.dd.HH.mm.ss.fff");
         public string Date => _creationDateTime.ToString("yyyy-MM-dd HH:mm");
-        public string CashRef => _cashRef;
+        public string CashRef {
+            get => _cashRef;
+            init => _cashRef = value;
+        }
 
         public decimal TotalPriceNoBtw {
             get {
@@ -43,17 +49,21 @@ namespace WinkelDomein.Model {
             }
         }
         public decimal TotalPrice => TotalPriceNoBtw + TotalBtw;
-        public List<GescandProduct> ScannedProducts => _scannedProducts;
+        public List<GescandProduct> ScannedProducts {
+            get => _scannedProducts;
+            init => _scannedProducts = value;
+        }
+
         public bool HasScannedProducts => _scannedProducts.Count != 0;
         public int AmountOfProducts => _scannedProducts.Count;
 
         public KassaTicket() {
-            _creationDateTime = DateTime.Now;
-            _cashRef = $"CASH-{_creationDateTime:yyyyMMdd}-{_random.Next(100000, 999999)}";
+            CreationDateTime = DateTime.Now;
+            CashRef = $"CASH-{_creationDateTime:yyyyMMdd}-{_random.Next(100000, 999999)}";
         }
         public KassaTicket(DateTime creationTime, List<GescandProduct> scannedProducts) : this() {
-            _creationDateTime = creationTime;
-            _scannedProducts = scannedProducts;
+            CreationDateTime = creationTime;
+            ScannedProducts = scannedProducts;
         }
 
         /* Voegt een nieuw product toe aan het ticket moest het nog niet in ScannedProducts zitten,
@@ -61,23 +71,22 @@ namespace WinkelDomein.Model {
         public void IncreaseProduct(Product? product, int amount = 1, bool actionHistory = true) {
             if (amount == 0) return;
             if (product == null) throw new ArgumentException(message: "Dit product bestaat niet");
-            GescandProduct foundGescandProduct = _scannedProducts.Find((gescandProduct) => gescandProduct.Product == product)!;
+            GescandProduct foundGescandProduct = ScannedProducts.Find((gescandProduct) => gescandProduct.Product == product)!;
             if (foundGescandProduct == default) {
                 GescandProduct newGescandProduct = new(product, amount);
-                _scannedProducts.Add(newGescandProduct);
+                ScannedProducts.Add(newGescandProduct);
             } else {
                 foundGescandProduct.Quantity += amount; ;
             }
             if (actionHistory) _actionHistory.Add(new(product, amount));
             Logger.LogScanProduct(this, product, amount);
         }
-        /* Verminderd het aantal van het product in ScannedProducts dat overeenkomt met het opgegeven product met het 
-         * 
-         */
+        /* Verminderd het aantal van het product in ScannedProducts dat overeenkomt met het opgegeven product met het gegeven aantal,
+        Verwijdert het product volledig uit ScannedProducts moest het opgegeven aantal gelijk of meer zijn aan het te verminderen aantal*/
         public void DiminishProduct(Product? product, int amount = 1, bool actionHistory = true) {
             if (amount == 0) return;
             if (product == null) throw new ArgumentException(message: "Dit product bestaat niet");
-            GescandProduct foundGescandProduct = _scannedProducts.Find((gescandProduct) => gescandProduct.Product == product)!;
+            GescandProduct foundGescandProduct = ScannedProducts.Find((gescandProduct) => gescandProduct.Product == product)!;
             if (foundGescandProduct == default) {
                 throw new ArgumentException(message: "Het kassaticket bevat dit product niet");
             } else if (foundGescandProduct.Quantity <= amount) {
@@ -90,13 +99,14 @@ namespace WinkelDomein.Model {
                 Logger.LogRemoveProduct(this, product, amount);
             }
         }
+
         public void IncreaseLastProduct(int amount = 1, bool actionHistory = true) {
-            if (ScannedProducts.Count == 0) throw new ArgumentException(message: "Er zijn nog geen producten ingescand");
+            if (AmountOfProducts == 0) throw new ArgumentException(message: "Er zijn nog geen producten ingescand");
             GescandProduct gescandProduct = ScannedProducts[^1];
             IncreaseProduct(gescandProduct.Product, amount, actionHistory);
         }
         public void DiminishLastProduct(int amount = 1, bool actionHistory = true) {
-            if (ScannedProducts.Count == 0) throw new ArgumentException(message: "Er zijn nog geen producten ingescand");
+            if (AmountOfProducts == 0) throw new ArgumentException(message: "Er zijn nog geen producten ingescand");
             GescandProduct gescandProduct = ScannedProducts[^1];
             DiminishProduct(gescandProduct.Product, amount, actionHistory);
         }
@@ -117,7 +127,6 @@ namespace WinkelDomein.Model {
             } else {
                 throw new Exception(message: "Actiegeschiedenis kan geen 0 bevatten");
             }
-
             _actionHistory.RemoveAt(_actionHistory.Count - 1);
         }
 

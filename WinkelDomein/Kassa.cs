@@ -1,4 +1,5 @@
-﻿using WinkelDomein.Enums;
+﻿using System.Globalization;
+using WinkelDomein.Enums;
 using WinkelDomein.Interface;
 using WinkelDomein.Model;
 
@@ -6,6 +7,7 @@ namespace WinkelDomein {
     public class Kassa {
         private readonly IBetaalTerminal _betaalTerminal;
         private List<Product> _possibleProducts = [];
+        private List<Korting> _reductions = [];
         private List<KassaTicket> _tickets = [];
         private KassaTicket _currentTicket;
         private const string PRODUCTSFILEPATH = @"Producten.txt";
@@ -35,8 +37,8 @@ namespace WinkelDomein {
 
         private void Start() {
             ParsePossibleProducts();
-            ParseParkedTickets();
             ParseReductions();
+            ParseParkedTickets();
 
             GenerateNewKassaTicket();
         }
@@ -83,9 +85,23 @@ namespace WinkelDomein {
         private void ParseReductions() {
             if (!File.Exists(REDUCTIONSFILEPATH)) File.Create(REDUCTIONSFILEPATH);
             string[] rawReductions = File.ReadAllLines(REDUCTIONSFILEPATH);
-            if (rawReductions.Length == 0) Logger.SystemLog("Geen kortingscodes beschikbaar."); return;
-
-
+            if (rawReductions.Length == 0) {
+                Logger.SystemLog("Geen kortingscodes beschikbaar.");
+                return;
+            }
+            foreach (var rawReduction in rawReductions) {
+                string[] rawReductionSplit = rawReduction.Split(';');
+                if (!Enum.TryParse(rawReductionSplit[0], ignoreCase: true, out ProductCategorie category)) 
+                    throw new ArgumentException(message: "Foute productcategorie in kortingen");
+                if (!int.TryParse(rawReductionSplit[1], out int reductionPercentage))
+                    throw new ArgumentException(message: "Fout kortingspercentage in kortingen");
+                if (!DateOnly.TryParseExact(rawReductionSplit[2], "yyyy/MM/dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly startDate))
+                    throw new ArgumentException(message: "Foute startdatum in kortingen");
+                if (!DateOnly.TryParseExact(rawReductionSplit[3], "yyyy/MM/dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly endDate))
+                    throw new ArgumentException(message: "Foute einddatum in kortingen");
+                Korting newReduction = new(category, reductionPercentage, startDate, endDate);
+                _reductions.Add(newReduction);
+            }
         }
 
         private static void StoreTicket(KassaTicket ticket) {

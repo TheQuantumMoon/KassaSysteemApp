@@ -12,7 +12,7 @@ namespace WinkelDomein.Model {
             ReductionPercentage = reductionPercentage;
             StartDate = startDate;
             EndDate = endDate;
-            if (StartDate >= EndDate) throw new Exception(message: "Startdatum mag niet na einddatum komen");
+            if (StartDate > EndDate) throw new Exception(message: "Startdatum mag niet na einddatum komen");
         }
 
         public ProductCategorie Category { 

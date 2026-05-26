@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Net.Sockets;
 using WinkelDomein;
 using WinkelDomein.Enums;
 using WinkelDomein.Interface;
@@ -84,6 +85,8 @@ namespace DataOpslag {
             string[] rawTickets = File.ReadAllLines(PARKEDTICKETSFILEPATH);
 
             for (int i = 0; i < rawTickets.Length; i++) {
+                DateTime now = DateTime.Now;
+                int ticketLifetimeInMinutes = 30;
                 string[] rawTicket = rawTickets[i].Split(';');
                 if (!long.TryParse(rawTicket[0], out long dateAsNumber)) {
                     Logger.LogError("Foute creatietijd in geparkeerde tickets");
@@ -92,7 +95,12 @@ namespace DataOpslag {
                 DateTime creationTime;
                 try { creationTime = new(dateAsNumber); }
                 catch { Logger.LogError("Foute creatietijd in geparkeerde tickets"); continue; }
-
+                // Aanpassing ----
+                if (creationTime.AddMinutes(ticketLifetimeInMinutes) < now) {
+                    RemoveStoredTicketByCeationTime(creationTime);
+                    Logger.GeneralLog($"Ticket vervallen {dateAsNumber}");
+                    continue;
+                }
                 List<GescandProduct> scannedProducts = [];
                 for (int j = 1; j < rawTicket.Length; j += 2) {
                     string productCode = rawTicket[j];
@@ -122,6 +130,13 @@ namespace DataOpslag {
         }
         public void RemoveStoredTicket(KassaTicket ticket) {
             string ticketTimeStamp = ticket.CreationDateTime.Ticks.ToString();
+            List<string> parkedTicketsString = [.. File.ReadAllLines(PARKEDTICKETSFILEPATH)];
+            int amountRemoved = parkedTicketsString.RemoveAll(x => x.StartsWith(ticketTimeStamp));
+            if (amountRemoved > 1) throw new Exception(message: "Meer dan 1 element is verwijderd uit de parked tickets opslag");
+            File.WriteAllLinesAsync(PARKEDTICKETSFILEPATH, parkedTicketsString);
+        }
+        public void RemoveStoredTicketByCeationTime(DateTime creationTime) {
+            string ticketTimeStamp = creationTime.Ticks.ToString();
             List<string> parkedTicketsString = [.. File.ReadAllLines(PARKEDTICKETSFILEPATH)];
             int amountRemoved = parkedTicketsString.RemoveAll(x => x.StartsWith(ticketTimeStamp));
             if (amountRemoved > 1) throw new Exception(message: "Meer dan 1 element is verwijderd uit de parked tickets opslag");

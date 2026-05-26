@@ -15,7 +15,7 @@ namespace Startup {
             IDataOpslag repo = new DataRepo();
             IBetaalTerminal snelleTerminal = new MockBetaalTerminal(500, 2000);
             Kassa kassa = new(snelleTerminal, repo);
-            KassaApplication _ = new(kassa);
+            KassaApplicatie _ = new(kassa);
 
         }
     }

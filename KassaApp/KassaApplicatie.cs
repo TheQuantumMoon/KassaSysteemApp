@@ -5,10 +5,10 @@ using static System.Console;
 
 namespace KassaApp;
 
-public class KassaApplication {
+public class KassaApplicatie {
     private readonly Kassa _kassa;
 
-    public KassaApplication(Kassa kassa) {
+    public KassaApplicatie(Kassa kassa) {
         _kassa = kassa;
         Start();
     }
